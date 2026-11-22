@@ -28,7 +28,8 @@
   },
   "directory": { "title": "Providers", "empty": "No providers available." },
   "booking": { "title": "Booking", "estimate": "Fare estimate" },
-  "provider": { "dashboard": "Dashboard", "goOnline": "Go online", "earnings": "Earnings", "today": "Today", "rentals": "Rentals", "noRentals": "No rentals." }
+  "provider": { "dashboard": "Dashboard", "goOnline": "Go online", "earnings": "Earnings", "today": "Today", "rentals": "Rentals", "noRentals": "No rentals." },
+  "nav": { "home": "Home", "rides": "Rides", "assistant": "Assistant", "account": "Account" }
 }
 
 

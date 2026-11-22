@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
-:root {
-  --green: #087C55;
-  --forest: #123D32;
-  --orange: #F28C28;
-  --ivory: #F7F5EF;
-  --charcoal: #242B29;
-  --grey: #E8ECE9;
+@theme {
+  --color-green: #087C55;
+  --color-forest: #123D32;
+  --color-orange: #F28C28;
+  --color-ivory: #F7F5EF;
+  --color-charcoal: #242B29;
+  --color-grey: #E8ECE9;
   --font-heading: "Plus Jakarta Sans", sans-serif;
   --font-body: "Inter", sans-serif;
+  --radius-card: 1rem;
 }
 
 body {
-  background: var(--ivory);
-  color: var(--charcoal);
+  background: var(--color-ivory);
+  color: var(--color-charcoal);
   font-family: var(--font-body);
 }
 h1, h2, h3 { font-family: var(--font-heading); }
