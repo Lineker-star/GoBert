@@ -1,7 +1,10 @@
 {
   "home": {
     "title": "GoBert",
-    "tagline": "Move. Connect. Go."
+    "tagline": "Move. Connect. Go.",
+    "whereTo": "Où allez-vous ?",
+    "service": { "moto": "Moto", "ride": "Course", "express": "Express", "cargo": "Cargo", "rent": "Location" },
+    "shortcut": { "home": "Maison", "work": "Travail", "market": "Marché", "hospital": "Hôpital", "carrefour": "Carrefour" }
   },
   "auth": {
     "title": "Connexion",
@@ -22,6 +25,9 @@
     "review": "Vérification",
     "back": "Retour",
     "next": "Suivant"
-  }
+  },
+  "directory": { "title": "Prestataires", "empty": "Aucun prestataire disponible." },
+  "booking": { "title": "Réservation", "estimate": "Estimation du tarif" }
 }
+
 
