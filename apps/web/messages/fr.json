@@ -27,7 +27,8 @@
     "next": "Suivant"
   },
   "directory": { "title": "Prestataires", "empty": "Aucun prestataire disponible." },
-  "booking": { "title": "Réservation", "estimate": "Estimation du tarif" }
+  "booking": { "title": "Réservation", "estimate": "Estimation du tarif" },
+  "provider": { "dashboard": "Tableau de bord", "goOnline": "Passer en ligne", "earnings": "Gains", "today": "Aujourd'hui", "rentals": "Locations", "noRentals": "Aucune location." }
 }
 
 

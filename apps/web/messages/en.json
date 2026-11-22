@@ -27,7 +27,8 @@
     "next": "Next"
   },
   "directory": { "title": "Providers", "empty": "No providers available." },
-  "booking": { "title": "Booking", "estimate": "Fare estimate" }
+  "booking": { "title": "Booking", "estimate": "Fare estimate" },
+  "provider": { "dashboard": "Dashboard", "goOnline": "Go online", "earnings": "Earnings", "today": "Today", "rentals": "Rentals", "noRentals": "No rentals." }
 }
 
 
