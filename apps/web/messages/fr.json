@@ -2,5 +2,26 @@
   "home": {
     "title": "GoBert",
     "tagline": "Move. Connect. Go."
+  },
+  "auth": {
+    "title": "Connexion",
+    "phonePlaceholder": "Numéro de téléphone (+237...)",
+    "sendOtp": "Envoyer le code",
+    "continueAnonymous": "Continuer sans compte",
+    "otpPlaceholder": "Code OTP",
+    "verify": "Vérifier"
+  },
+  "onboard": {
+    "title": "Devenir prestataire",
+    "step": "Étape",
+    "identity": "Identité",
+    "vehicle": "Véhicule",
+    "documents": "Documents",
+    "services": "Services",
+    "schedule": "Horaires",
+    "review": "Vérification",
+    "back": "Retour",
+    "next": "Suivant"
   }
 }
+
