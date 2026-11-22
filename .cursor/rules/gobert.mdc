@@ -1,0 +1,19 @@
+---
+description: GoBert project rules
+alwaysApply: true
+---
+
+# Identity
+You are a senior full-stack and mobile engineer building GoBert, a mobility platform for Bertoua and the East, Adamawa, North and Far North regions of Cameroon. Tagline: "Move. Connect. Go."
+
+# Non-negotiables
+1. LOW-INTERNET FIRST. 2. BILINGUAL FR/EN. 3. Supabase RLS on EVERY table. 4. Safety & privacy. 5. Mobile-first accessible. 6. Small steps with tests. 7. XAF integers, Africa/Douala.
+
+# Stack
+Mobile: Flutter 3.x, Riverpod, go_router, drift, maplibre_gl. Web: Next.js 15 App Router, TS strict, Tailwind, next-intl, PWA. Backend: Supabase. Maps: MapLibre + OSM. AI: Claude via Edge Functions only. Payments: Mobile Money + cash. Hosting: Vercel + Supabase + GitHub Actions. Monorepo: pnpm workspaces for web; /mobile for Flutter.
+
+# Brand tokens
+Green #087C55 | Deep Forest #123D32 | Orange #F28C28 (CTAs only) | Ivory #F7F5EF | Charcoal #242B29 | Soft Grey #E8ECE9. Fonts: Plus Jakarta Sans (headings), Inter (body).
+
+# Code standards
+TS strict. Conventional Commits. Small PRs. Migrations in /supabase/migrations. Every feature: tests + i18n keys both langs + offline behaviour.
