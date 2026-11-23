@@ -8,11 +8,43 @@
   },
   "auth": {
     "title": "Connexion",
-    "phonePlaceholder": "Numéro de téléphone (+237...)",
+    "subtitle": "Connectez-vous avec votre numéro de téléphone",
+    "phonePlaceholder": "Numéro de téléphone",
     "sendOtp": "Envoyer le code",
     "continueAnonymous": "Continuer sans compte",
-    "otpPlaceholder": "Code OTP",
-    "verify": "Vérifier"
+    "otpPlaceholder": "Code à 6 chiffres",
+    "verify": "Vérifier",
+    "resend": "Renvoyer le code",
+    "resendIn": "Renvoyer dans {seconds}s",
+    "changeNumber": "Changer de numéro",
+    "verifying": "Vérification…",
+    "sending": "Envoi…",
+    "errors": {
+      "rate_limited": "Trop de tentatives. Veuillez patienter avant de réessayer.",
+      "invalid_otp": "Code incorrect ou expiré.",
+      "network": "Problème de connexion. Vérifiez votre réseau.",
+      "anonymous_disabled": "La connexion anonyme n'est pas activée.",
+      "sms_disabled": "L'envoi de SMS n'est pas configuré.",
+      "invalid_phone": "Numéro de téléphone invalide.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    }
+  },
+  "account": {
+    "title": "Compte",
+    "anonymous": "Session anonyme",
+    "signedOut": "Vous n'êtes pas connecté.",
+    "signIn": "Se connecter",
+    "name": "Nom",
+    "namePlaceholder": "Votre nom",
+    "language": "Langue",
+    "savedPlaces": "Lieux enregistrés",
+    "signOut": "Se déconnecter",
+    "becomeProvider": "Devenir prestataire",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "phone": "Téléphone",
+    "anonymousHint": "Créez un compte pour sauvegarder vos lieux et retrouver vos courses."
   },
   "onboard": {
     "title": "Devenir prestataire",

@@ -12,44 +12,38 @@ const SERVICE_COLOR: Record<string, string> = {
   rent: "#6b7280",
 };
 
-const MOCK_PROVIDERS: Provider[] = [
-  {
-    id: "11111111-1111-1111-1111-111111111001",
-    display_name: "Moto Rapide Bertoua",
-    city_id: null,
-    rating_avg: 4.8,
-    rating_count: 32,
-    accepts_direct_calls: true,
-    is_online: true,
-    last_location: { lat: 4.58, lng: 13.69 },
-    last_seen_at: new Date().toISOString(),
-    service: "moto",
-  },
-  {
-    id: "11111111-1111-1111-1111-111111111002",
-    display_name: "Taxi Sud Est",
-    city_id: null,
-    rating_avg: 4.6,
-    rating_count: 21,
-    accepts_direct_calls: false,
-    is_online: true,
-    last_location: { lat: 4.57, lng: 13.68 },
-    last_seen_at: new Date().toISOString(),
-    service: "ride",
-  },
-  {
-    id: "11111111-1111-1111-1111-111111111003",
-    display_name: "Cargo Express",
-    city_id: null,
-    rating_avg: 4.9,
-    rating_count: 14,
-    accepts_direct_calls: true,
-    is_online: true,
-    last_location: { lat: 4.575, lng: 13.678 },
-    last_seen_at: new Date().toISOString(),
-    service: "cargo",
-  },
+const MOCK_NAMES = [
+  "Mbarga Jean","Nkoulou Marie","Tchoumi Paul","Etoa Bernard","Mballa Rose",
+  "Nkeng Samuel","Tanyi Grace","Fouda Pierre","Manga Alice","Ngo Bell",
+  "Tchinda Joseph","Ekema Sylvie","Nkolo David","Mbah Eric","Toche Clarisse",
+  "Ngambe Serge","Etoundi Jeanne","Mballa II","Nkoulou Jean","Tchoumi Alain",
+  "Etoa Marie","Mballa Paul","Nkeng Rose","Tanyi Bernard","Fouda Grace",
 ];
+const MOCK_TYPES = [
+  "moto","moto","moto","moto","moto","moto","moto","moto","moto","moto",
+  "moto","moto","moto","moto","moto","ride","ride","ride","ride","ride","ride",
+  "ride","ride","cargo","cargo",
+];
+const MOCK_PROVIDERS: Provider[] = MOCK_NAMES.map((name, idx) => {
+  const i = idx + 1;
+  const service = MOCK_TYPES[idx];
+  const online = i % 3 !== 0;
+  return {
+    id: `00000000-0000-0000-0000-${String(i).padStart(12, "0")}`,
+    display_name: name,
+    city_id: null,
+    rating_avg: Math.round((4.2 + (i % 7) * 0.1) * 10) / 10,
+    rating_count: 5 + i * 3,
+    accepts_direct_calls: i % 2 === 0,
+    is_online: online,
+    last_location: {
+      lat: 4.5774 + ((i % 7) - 3) * 0.006,
+      lng: 13.6846 + ((i % 5) - 2) * 0.008,
+    },
+    last_seen_at: new Date().toISOString(),
+    service,
+  };
+});
 
 function markerFor(p: Provider) {
   const loc = p.last_location;
@@ -82,7 +76,7 @@ export function useProviders(center: { lat: number; lng: number }): UseProviders
 
   const fetchProviders = useCallback(async () => {
     if (USE_MOCKS) {
-      setProviders(MOCK_PROVIDERS);
+      setProviders(MOCK_PROVIDERS.filter((p) => p.is_online));
       setLoading(false);
       setError(null);
       return;
