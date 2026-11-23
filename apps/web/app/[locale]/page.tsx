@@ -1,6 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { Bike, Car, Package, Truck, KeyRound } from "lucide-react";
+import { Bike, Car, Package, Truck, KeyRound, MapPin } from "lucide-react";
 
 const SERVICES = [
   { key: "moto", Icon: Bike },
@@ -13,30 +13,37 @@ const SERVICES = [
 export default function Home() {
   const t = useTranslations("home");
   return (
-    <main className="min-h-screen p-6 flex flex-col gap-4">
-      <h1 className="text-3xl font-bold text-[var(--green)]">{t("title")}</h1>
-      <input
-        className="border rounded-xl p-4 text-lg"
-        placeholder={t("whereTo")}
-      />
-      <div className="grid grid-cols-3 gap-3">
-        {SERVICES.map(({ key, Icon }) => (
-          <button
-            key={key}
-            className="bg-white rounded-xl p-4 shadow text-center border flex flex-col items-center gap-2"
-          >
-            <Icon className="w-6 h-6" />
-            <span className="text-sm font-medium">{t(`service.${key}`)}</span>
-          </button>
-        ))}
+    <div className="relative min-h-screen">
+      <div className="h-[55vh] bg-grey flex items-center justify-center">
+        <div className="text-center text-charcoal/60">
+          <MapPin className="w-8 h-8 mx-auto mb-2" />
+          <p>Map placeholder (MapLibre to be wired)</p>
+        </div>
       </div>
-      <div className="flex gap-2 flex-wrap">
-        {["home", "work", "market", "hospital", "carrefour"].map((q) => (
-          <button key={q} className="border rounded-full px-3 py-1 text-sm">
-            {t(`shortcut.${q}`)}
-          </button>
-        ))}
+      <div className="bg-ivory rounded-t-2xl -mt-4 p-4 shadow-lg">
+        <input
+          className="w-full border rounded-xl p-3 text-lg mb-3"
+          placeholder={t("whereTo")}
+        />
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {SERVICES.map(({ key, Icon }) => (
+            <button
+              key={key}
+              className="bg-white rounded-xl p-3 border flex flex-col items-center gap-1"
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-xs font-medium">{t(`service.${key}`)}</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {["home", "work", "market", "hospital", "carrefour"].map((q) => (
+            <button key={q} className="border rounded-full px-3 py-1 text-sm">
+              {t(`shortcut.${q}`)}
+            </button>
+          ))}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
