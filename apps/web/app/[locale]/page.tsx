@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import MapContainer from "@/components/map/MapContainer";
 import GeoLocationButton from "@/components/map/GeoLocationButton";
@@ -20,6 +21,8 @@ const SERVICES: ServiceKey[] = ["moto", "ride", "express", "cargo", "rent"];
 
 export default function Home() {
   const t = useTranslations();
+  const locale = useLocale();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const [mapReady, setMapReady] = useState(false);
@@ -75,11 +78,17 @@ export default function Home() {
     setMapKey((k) => k + 1);
   }, []);
 
-  const handlePick = useCallback((place: { lat: number; lng: number; label: string }) => {
-    setDropoff(place);
-    setCenter([place.lng, place.lat]);
-    setSearchOpen(false);
-  }, []);
+  const handlePick = useCallback(
+    (place: { lat: number; lng: number; label: string }) => {
+      setDropoff(place);
+      setCenter([place.lng, place.lat]);
+      setSearchOpen(false);
+      router.push(
+        `/${locale}/booking?lat=${place.lat}&lng=${place.lng}&label=${encodeURIComponent(place.label)}`,
+      );
+    },
+    [locale, router],
+  );
 
   const openSearch = () => setSearchOpen(true);
   const closeSearch = () => setSearchOpen(false);
