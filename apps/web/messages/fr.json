@@ -29,7 +29,48 @@
   "directory": { "title": "Prestataires", "empty": "Aucun prestataire disponible." },
   "booking": { "title": "Réservation", "estimate": "Estimation du tarif" },
   "provider": { "dashboard": "Tableau de bord", "goOnline": "Passer en ligne", "earnings": "Gains", "today": "Aujourd'hui", "rentals": "Locations", "noRentals": "Aucune location." },
-  "nav": { "home": "Accueil", "rides": "Courses", "assistant": "Assistant", "account": "Compte" }
+  "nav": { "home": "Accueil", "rides": "Courses", "assistant": "Assistant", "account": "Compte" },
+  "map": {
+    "loading": "Chargement de la carte…",
+    "failed": "Impossible de charger la carte.",
+    "retry": "Réessayer",
+    "center": "Centre sur Bertoua",
+    "pickup": "Point de d\u00e9part"
+  },
+  "geo": {
+    "button": "Ma position",
+    "denied": "Localisation refusée. Vous pouvez saisir une adresse manuellement.",
+    "unavailable": "Localisation indisponible sur cet appareil.",
+    "acquired": "Position détectée",
+    "fallback": "Utilisez la recherche pour choisir votre point de départ."
+  },
+  "search": {
+    "placeholder": "Où allez-vous ? (ex. derrière le marché central)",
+    "savedPlaces": "Lieux enregistrés",
+    "home": "Maison",
+    "work": "Travail",
+    "market": "Marché",
+    "hospital": "Hôpital",
+    "carrefour": "Carrefour",
+    "noResults": "Aucun résultat trouvé",
+    "searching": "Recherche…",
+    "pickDestination": "Choisir une destination"
+  },
+  "providers": {
+    "available": "prestataires disponibles",
+    "nearby": "Prestataires à proximité",
+    "offline": "Hors ligne",
+    "refreshing": "Mise à jour…"
+  },
+  "offline": {
+    "banner": "Vous êtes hors ligne. Affichage des derniers résultats en cache.",
+    "retry": "Réessayer"
+  },
+  "saved": {
+    "title": "Lieux enregistrés",
+    "empty": "Aucun lieu enregistré pour le moment.",
+    "store": "Les lieux sont enregistrés sur votre compte."
+  }
 }
 
 

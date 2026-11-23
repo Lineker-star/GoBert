@@ -29,7 +29,48 @@
   "directory": { "title": "Providers", "empty": "No providers available." },
   "booking": { "title": "Booking", "estimate": "Fare estimate" },
   "provider": { "dashboard": "Dashboard", "goOnline": "Go online", "earnings": "Earnings", "today": "Today", "rentals": "Rentals", "noRentals": "No rentals." },
-  "nav": { "home": "Home", "rides": "Rides", "assistant": "Assistant", "account": "Account" }
+  "nav": { "home": "Home", "rides": "Rides", "assistant": "Assistant", "account": "Account" },
+  "map": {
+    "loading": "Loading map…",
+    "failed": "Unable to load the map.",
+    "retry": "Retry",
+    "center": "Center on Bertoua",
+    "pickup": "Pickup point"
+  },
+  "geo": {
+    "button": "My location",
+    "denied": "Location denied. You can enter an address manually.",
+    "unavailable": "Location unavailable on this device.",
+    "acquired": "Location detected",
+    "fallback": "Use search to pick your departure point."
+  },
+  "search": {
+    "placeholder": "Where to? (e.g. behind the central market)",
+    "savedPlaces": "Saved places",
+    "home": "Home",
+    "work": "Work",
+    "market": "Market",
+    "hospital": "Hospital",
+    "carrefour": "Carrefour",
+    "noResults": "No results found",
+    "searching": "Searching…",
+    "pickDestination": "Pick a destination"
+  },
+  "providers": {
+    "available": "providers available",
+    "nearby": "Providers nearby",
+    "offline": "Offline",
+    "refreshing": "Updating…"
+  },
+  "offline": {
+    "banner": "You are offline. Showing last cached results.",
+    "retry": "Retry"
+  },
+  "saved": {
+    "title": "Saved places",
+    "empty": "No saved places yet.",
+    "store": "Places are saved to your account."
+  }
 }
 
 
