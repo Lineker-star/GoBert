@@ -18,6 +18,7 @@ export type MockProvider = {
   rating_count: number;
   accepts_direct_calls: boolean;
   is_online: boolean;
+  verification_status: ProviderStatus;
   last_location: { lat: number; lng: number };
   service: string;
   vehicle: MockVehicle;
@@ -56,9 +57,63 @@ export type MockBooking = {
   rating_comment: string | null;
 };
 
+export type ProviderStatus = "pending" | "approved" | "rejected" | "changes_requested" | "suspended";
+
+export type RegistrationService = {
+  type: string;
+  title_fr: string;
+  title_en: string;
+  base_price_xaf: number;
+  zones: string[];
+};
+
+export type RegistrationDocument = {
+  type: string;
+  name: string;
+  size: number;
+  data_url: string;
+};
+
+export type RegistrationData = {
+  full_name?: string;
+  phone?: string;
+  vehicle_type?: VehicleType;
+  brand?: string;
+  model?: string;
+  plate?: string;
+  color?: string;
+  year?: number;
+  documents?: RegistrationDocument[];
+  services?: RegistrationService[];
+  schedule?: { days: number[]; start: string; end: string; is_24h: boolean };
+};
+
+export type RegistrationDraft = {
+  id: string;
+  user_id: string;
+  step: number;
+  data: RegistrationData;
+  status: "draft" | "submitted";
+  provider_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AuditEntry = {
+  id: string;
+  provider_id: string | null;
+  draft_id: string | null;
+  decision: string;
+  reason: string | null;
+  at: string;
+};
+
 type MockState = {
   providers: MockProvider[];
   bookings: MockBooking[];
+  drafts: RegistrationDraft[];
+  audit: AuditEntry[];
+  documents: (RegistrationDocument & { id: string; provider_id: string | null })[];
 };
 
 const NAMES = [
@@ -67,11 +122,13 @@ const NAMES = [
   "Tchinda Joseph","Ekema Sylvie","Nkolo David","Mbah Eric","Toche Clarisse",
   "Ngambe Serge","Etoundi Jeanne","Mballa II","Nkoulou Jean","Tchoumi Alain",
   "Etoa Marie","Mballa Paul","Nkeng Rose","Tanyi Bernard","Fouda Grace",
+  "Ngambe Paul","Etoundi Marie","Mballa Jean","Nkoulou Alain","Tchoumi Rose",
 ];
 const TYPES: VehicleType[] = [
   "moto","moto","moto","moto","moto","moto","moto","moto","moto","moto",
   "moto","moto","moto","moto","moto","taxi","taxi","taxi","taxi","taxi","taxi",
   "taxi","taxi","truck","truck",
+  "moto","taxi","tricycle","truck","moto",
 ];
 const VEHICLE_INFO: Record<VehicleType, { brand: string; model: string; color: string }> = {
   moto: { brand: "Sanota", model: "RX 135", color: "Rouge" },
@@ -86,13 +143,15 @@ function buildProviders(): MockProvider[] {
     const i = idx + 1;
     const type = TYPES[idx];
     const info = VEHICLE_INFO[type];
+    const approved = idx < 25;
     return {
       id: `00000000-0000-0000-0000-${String(i).padStart(12, "0")}`,
       display_name: name,
-      rating_avg: Math.round((4.2 + (i % 7) * 0.1) * 10) / 10,
-      rating_count: 5 + i * 3,
+      rating_avg: approved ? Math.round((4.2 + (i % 7) * 0.1) * 10) / 10 : 0,
+      rating_count: approved ? 5 + i * 3 : 0,
       accepts_direct_calls: i % 2 === 0,
-      is_online: true,
+      is_online: approved && i % 3 !== 0,
+      verification_status: approved ? "approved" : "pending",
       last_location: {
         lat: 4.5774 + ((i % 7) - 3) * 0.006,
         lng: 13.6846 + ((i % 5) - 2) * 0.008,
@@ -111,7 +170,7 @@ function buildProviders(): MockProvider[] {
 }
 
 function initialState(): MockState {
-  return { providers: buildProviders(), bookings: [] };
+  return { providers: buildProviders(), bookings: [], drafts: [], audit: [], documents: [] };
 }
 
 const g = globalThis as any;
@@ -269,4 +328,149 @@ export function getIncomingForProvider(providerId: string): MockBooking[] {
     const dist = haversineM(p.last_location, b.pickup);
     return dist < 8000; // within 8km
   });
+}
+
+// ---------------- Registration drafts ----------------
+
+export function saveDraft(
+  draftId: string | null,
+  userId: string,
+  step: number,
+  data: RegistrationData,
+): RegistrationDraft {
+  const now = new Date().toISOString();
+  if (draftId) {
+    const existing = store.drafts.find((d) => d.id === draftId);
+    if (existing) {
+      existing.step = step;
+      existing.data = { ...existing.data, ...data };
+      existing.updated_at = now;
+      return existing;
+    }
+  }
+  const draft: RegistrationDraft = {
+    id: crypto.randomUUID(),
+    user_id: userId,
+    step,
+    data,
+    status: "draft",
+    provider_id: null,
+    created_at: now,
+    updated_at: now,
+  };
+  store.drafts.push(draft);
+  return draft;
+}
+
+export function getDraft(id: string): RegistrationDraft | undefined {
+  return store.drafts.find((d) => d.id === id);
+}
+
+export function getDraftByProvider(providerId: string): RegistrationDraft | undefined {
+  return store.drafts.find((d) => d.provider_id === providerId);
+}
+
+export function submitDraft(draftId: string): MockProvider | null {
+  const draft = store.drafts.find((d) => d.id === draftId);
+  if (!draft) return null;
+  const now = new Date().toISOString();
+  const type = draft.data.vehicle_type ?? "moto";
+  const info = VEHICLE_INFO[type];
+  const i = store.providers.length + 1;
+  const provider: MockProvider = {
+    id: crypto.randomUUID(),
+    display_name: draft.data.full_name || "Nouveau prestataire",
+    rating_avg: 0,
+    rating_count: 0,
+    accepts_direct_calls: true,
+    is_online: false,
+    verification_status: "pending",
+    last_location: {
+      lat: 4.5774 + ((i % 7) - 3) * 0.004,
+      lng: 13.6846 + ((i % 5) - 2) * 0.004,
+    },
+    service: type === "moto" ? "moto" : type === "taxi" ? "ride" : type === "truck" ? "cargo" : "ride",
+    vehicle: {
+      type,
+      brand: draft.data.brand || info.brand,
+      model: draft.data.model || info.model,
+      color: draft.data.color || info.color,
+      plate: draft.data.plate || `EST ${100 + i} AA`,
+    },
+    photo: `https://i.pravatar.cc/150?img=${(i % 60) + 1}`,
+  };
+  store.providers.push(provider);
+
+  for (const doc of draft.data.documents ?? []) {
+    store.documents.push({ ...doc, id: crypto.randomUUID(), provider_id: provider.id });
+  }
+
+  draft.status = "submitted";
+  draft.provider_id = provider.id;
+  draft.updated_at = now;
+  return provider;
+}
+
+// ---------------- Admin ----------------
+
+export function adminLogin(email: string, password: string): boolean {
+  return email === "admin@gobert.cm" && password === "admin123";
+}
+
+export function getQueue(status?: ProviderStatus): MockProvider[] {
+  if (!status) return store.providers;
+  return store.providers.filter((p) => p.verification_status === status);
+}
+
+export function getProviderDetail(providerId: string) {
+  const provider = store.providers.find((p) => p.id === providerId);
+  if (!provider) return null;
+  const documents = store.documents.filter((d) => d.provider_id === providerId);
+  const draft = getDraftByProvider(providerId);
+  return { provider, documents, draft: draft ?? null };
+}
+
+export function decideProvider(
+  providerId: string,
+  decision: "approve" | "reject" | "request_changes" | "suspend",
+  reason: string | null,
+): boolean {
+  const provider = store.providers.find((p) => p.id === providerId);
+  if (!provider) return false;
+  const now = new Date().toISOString();
+  if (decision === "approve") {
+    provider.verification_status = "approved";
+    provider.is_online = true;
+  } else if (decision === "reject") {
+    provider.verification_status = "rejected";
+    provider.is_online = false;
+  } else if (decision === "request_changes") {
+    provider.verification_status = "changes_requested";
+  } else if (decision === "suspend") {
+    provider.verification_status = "suspended";
+    provider.is_online = false;
+  }
+  const draft = getDraftByProvider(providerId);
+  store.audit.push({
+    id: crypto.randomUUID(),
+    provider_id: providerId,
+    draft_id: draft?.id ?? null,
+    decision,
+    reason,
+    at: now,
+  });
+  return true;
+}
+
+export function getOverview() {
+  const pending = store.providers.filter((p) => p.verification_status === "pending").length;
+  const approved = store.providers.filter((p) => p.verification_status === "approved").length;
+  const active = store.providers.filter((p) => p.is_online && p.verification_status === "approved").length;
+  const today = new Date().toISOString().slice(0, 10);
+  const bookingsToday = store.bookings.filter((b) => b.created_at.slice(0, 10) === today).length;
+  return { pending, approved, active, bookings_today: bookingsToday };
+}
+
+export function getAuditLog(): AuditEntry[] {
+  return store.audit;
 }

@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getProviders, setProviderOnline } from "@/lib/mock-store";
 
 export async function GET() {
-  return NextResponse.json(getProviders());
+  const all = getProviders();
+  return NextResponse.json(
+    all.filter((p) => p.verification_status === "approved" && p.is_online),
+  );
 }
 
 export async function PATCH(req: NextRequest) {

@@ -12,39 +12,6 @@ const SERVICE_COLOR: Record<string, string> = {
   rent: "#6b7280",
 };
 
-const MOCK_NAMES = [
-  "Mbarga Jean","Nkoulou Marie","Tchoumi Paul","Etoa Bernard","Mballa Rose",
-  "Nkeng Samuel","Tanyi Grace","Fouda Pierre","Manga Alice","Ngo Bell",
-  "Tchinda Joseph","Ekema Sylvie","Nkolo David","Mbah Eric","Toche Clarisse",
-  "Ngambe Serge","Etoundi Jeanne","Mballa II","Nkoulou Jean","Tchoumi Alain",
-  "Etoa Marie","Mballa Paul","Nkeng Rose","Tanyi Bernard","Fouda Grace",
-];
-const MOCK_TYPES = [
-  "moto","moto","moto","moto","moto","moto","moto","moto","moto","moto",
-  "moto","moto","moto","moto","moto","ride","ride","ride","ride","ride","ride",
-  "ride","ride","cargo","cargo",
-];
-const MOCK_PROVIDERS: Provider[] = MOCK_NAMES.map((name, idx) => {
-  const i = idx + 1;
-  const service = MOCK_TYPES[idx];
-  const online = i % 3 !== 0;
-  return {
-    id: `00000000-0000-0000-0000-${String(i).padStart(12, "0")}`,
-    display_name: name,
-    city_id: null,
-    rating_avg: Math.round((4.2 + (i % 7) * 0.1) * 10) / 10,
-    rating_count: 5 + i * 3,
-    accepts_direct_calls: i % 2 === 0,
-    is_online: online,
-    last_location: {
-      lat: 4.5774 + ((i % 7) - 3) * 0.006,
-      lng: 13.6846 + ((i % 5) - 2) * 0.008,
-    },
-    last_seen_at: new Date().toISOString(),
-    service,
-  };
-});
-
 function markerFor(p: Provider) {
   const loc = p.last_location;
   if (!loc) return null;
@@ -76,9 +43,16 @@ export function useProviders(center: { lat: number; lng: number }): UseProviders
 
   const fetchProviders = useCallback(async () => {
     if (USE_MOCKS) {
-      setProviders(MOCK_PROVIDERS.filter((p) => p.is_online));
-      setLoading(false);
-      setError(null);
+      try {
+        const res = await fetch("/api/mock/providers");
+        const data = (await res.json()) as Provider[];
+        setProviders(data);
+        setError(null);
+      } catch {
+        setError("Failed to load providers");
+      } finally {
+        setLoading(false);
+      }
       return;
     }
     try {
