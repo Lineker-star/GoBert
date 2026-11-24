@@ -175,6 +175,35 @@
     "title": "Saved places",
     "empty": "No saved places yet.",
     "store": "Places are saved to your account."
+  },
+  "rent": {
+    "title": "Rent a vehicle",
+    "request": "Request",
+    "name": "Your name",
+    "withDriver": "With driver",
+    "noDriver": "Without driver",
+    "deposit": "Deposit",
+    "cancel": "Cancel",
+    "submit": "Send request",
+    "newRequest": "New request",
+    "pendingHint": "The provider will confirm your request."
+  },
+  "express": {
+    "title": "Express delivery",
+    "sender": "Sender",
+    "receiver": "Receiver",
+    "name": "Name",
+    "destination": "Destination",
+    "size": "Parcel size",
+    "addPhoto": "Add a photo (optional)",
+    "photoAdded": "Photo added",
+    "fare": "Fare",
+    "send": "Send parcel",
+    "otp": "Delivery code",
+    "otpHint": "Give this code to the courier on delivery.",
+    "deliver": "Deliver",
+    "noParcels": "No parcels.",
+    "wrongOtp": "Incorrect code."
   }
 }
 

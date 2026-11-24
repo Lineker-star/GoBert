@@ -108,12 +108,67 @@ export type AuditEntry = {
   at: string;
 };
 
+// ---------------- Rent & Express ----------------
+
+export type RentalVehicle = {
+  id: string;
+  provider_id: string;
+  type: "car" | "truck" | "van";
+  brand: string;
+  model: string;
+  plate: string;
+  photo: string;
+  price_per_hour_xaf: number;
+  price_per_day_xaf: number;
+  with_driver: boolean;
+  deposit_xaf: number;
+  available: boolean;
+};
+
+export type RentalStatus = "requested" | "confirmed" | "declined" | "active" | "completed";
+
+export type RentalRequest = {
+  id: string;
+  vehicle_id: string;
+  provider_id: string;
+  customer_name: string;
+  phone: string;
+  start_date: string;
+  end_date: string;
+  with_driver: boolean;
+  status: RentalStatus;
+  created_at: string;
+};
+
+export type ParcelSize = "small" | "medium" | "large";
+export type ParcelStatus = "requested" | "accepted" | "in_transit" | "delivered" | "cancelled";
+
+export type ExpressParcel = {
+  id: string;
+  sender_name: string;
+  sender_phone: string;
+  receiver_name: string;
+  receiver_phone: string;
+  pickup: { lat: number; lng: number; label: string };
+  dropoff: { lat: number; lng: number; label: string };
+  size: ParcelSize;
+  photo: string | null;
+  fare_xaf: number;
+  otp: string;
+  status: ParcelStatus;
+  provider_id: string | null;
+  created_at: string;
+};
+
 type MockState = {
   providers: MockProvider[];
   bookings: MockBooking[];
   drafts: RegistrationDraft[];
   audit: AuditEntry[];
   documents: (RegistrationDocument & { id: string; provider_id: string | null })[];
+  rentals: RentalVehicle[];
+  rentalRequests: RentalRequest[];
+  parcels: ExpressParcel[];
 };
 
 const NAMES = [
@@ -169,8 +224,46 @@ function buildProviders(): MockProvider[] {
   });
 }
 
+function buildRentals(providers: MockProvider[]): RentalVehicle[] {
+  const defs: { type: "car" | "truck" | "van"; brand: string; model: string; perH: number; perD: number; driver: boolean }[] = [
+    { type: "car", brand: "Toyota", model: "Corolla", perH: 3000, perD: 15000, driver: true },
+    { type: "car", brand: "Hyundai", model: "Accent", perH: 2500, perD: 12000, driver: false },
+    { type: "truck", brand: "Renault", model: "Master", perH: 6000, perD: 30000, driver: true },
+    { type: "truck", brand: "Iveco", model: "Daily", perH: 5500, perD: 28000, driver: true },
+    { type: "van", brand: "Toyota", model: "Hiace", perH: 4000, perD: 20000, driver: true },
+    { type: "van", brand: "Mercedes", model: "Sprinter", perH: 4500, perD: 22000, driver: false },
+  ];
+  return defs.map((d, i) => {
+    const prov = providers[i % providers.length];
+    return {
+      id: `rent-${i + 1}`,
+      provider_id: prov?.id ?? "00000000-0000-0000-0000-000000000001",
+      type: d.type,
+      brand: d.brand,
+      model: d.model,
+      plate: `EST ${500 + i * 13} RT`,
+      photo: `https://i.pravatar.cc/300?img=${(i % 60) + 1}`,
+      price_per_hour_xaf: d.perH,
+      price_per_day_xaf: d.perD,
+      with_driver: d.driver,
+      deposit_xaf: d.perD * 2,
+      available: true,
+    };
+  });
+}
+
 function initialState(): MockState {
-  return { providers: buildProviders(), bookings: [], drafts: [], audit: [], documents: [] };
+  const providers = buildProviders();
+  return {
+    providers,
+    bookings: [],
+    drafts: [],
+    audit: [],
+    documents: [],
+    rentals: buildRentals(providers),
+    rentalRequests: [],
+    parcels: [],
+  };
 }
 
 const g = globalThis as any;
@@ -473,4 +566,112 @@ export function getOverview() {
 
 export function getAuditLog(): AuditEntry[] {
   return store.audit;
+}
+
+// ---------------- Rent ----------------
+
+export function getRentals(): RentalVehicle[] {
+  return store.rentals.filter((v) => v.available);
+}
+
+export function createRentalRequest(input: {
+  vehicle_id: string;
+  customer_name: string;
+  phone: string;
+  start_date: string;
+  end_date: string;
+  with_driver: boolean;
+}): RentalRequest {
+  const vehicle = store.rentals.find((v) => v.id === input.vehicle_id);
+  const req: RentalRequest = {
+    id: crypto.randomUUID(),
+    vehicle_id: input.vehicle_id,
+    provider_id: vehicle?.provider_id ?? "00000000-0000-0000-0000-000000000001",
+    customer_name: input.customer_name,
+    phone: input.phone,
+    start_date: input.start_date,
+    end_date: input.end_date,
+    with_driver: input.with_driver,
+    status: "requested",
+    created_at: new Date().toISOString(),
+  };
+  store.rentalRequests.push(req);
+  return req;
+}
+
+export function getRentalRequest(id: string): RentalRequest | undefined {
+  return store.rentalRequests.find((r) => r.id === id);
+}
+
+export function respondRental(id: string, confirm: boolean): boolean {
+  const req = store.rentalRequests.find((r) => r.id === id);
+  if (!req || req.status !== "requested") return false;
+  req.status = confirm ? "confirmed" : "declined";
+  return true;
+}
+
+export function getRentalRequestsForProvider(providerId: string): RentalRequest[] {
+  return store.rentalRequests.filter((r) => r.provider_id === providerId);
+}
+
+// ---------------- Express ----------------
+
+function parcelFare(size: ParcelSize): number {
+  const base = size === "small" ? 500 : size === "medium" ? 1000 : 2000;
+  return base;
+}
+
+export function createParcel(input: {
+  sender_name: string;
+  sender_phone: string;
+  receiver_name: string;
+  receiver_phone: string;
+  pickup: { lat: number; lng: number; label: string };
+  dropoff: { lat: number; lng: number; label: string };
+  size: ParcelSize;
+  photo: string | null;
+}): ExpressParcel {
+  const otp = String(Math.floor(1000 + Math.random() * 9000));
+  const parcel: ExpressParcel = {
+    id: crypto.randomUUID(),
+    sender_name: input.sender_name,
+    sender_phone: input.sender_phone,
+    receiver_name: input.receiver_name,
+    receiver_phone: input.receiver_phone,
+    pickup: input.pickup,
+    dropoff: input.dropoff,
+    size: input.size,
+    photo: input.photo,
+    fare_xaf: parcelFare(input.size),
+    otp,
+    status: "requested",
+    provider_id: null,
+    created_at: new Date().toISOString(),
+  };
+  store.parcels.push(parcel);
+  return parcel;
+}
+
+export function getParcel(id: string): ExpressParcel | undefined {
+  return store.parcels.find((p) => p.id === id);
+}
+
+export function acceptParcel(id: string, providerId: string): boolean {
+  const parcel = store.parcels.find((p) => p.id === id);
+  if (!parcel || parcel.status !== "requested") return false;
+  parcel.provider_id = providerId;
+  parcel.status = "accepted";
+  return true;
+}
+
+export function deliverParcel(id: string, otp: string): boolean {
+  const parcel = store.parcels.find((p) => p.id === id);
+  if (!parcel || parcel.status === "delivered" || parcel.status === "cancelled") return false;
+  if (parcel.otp !== otp) return false;
+  parcel.status = "delivered";
+  return true;
+}
+
+export function getParcelsForProvider(): ExpressParcel[] {
+  return store.parcels.filter((p) => p.status === "requested" || p.status === "accepted");
 }

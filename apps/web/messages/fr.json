@@ -175,6 +175,35 @@
     "title": "Lieux enregistrés",
     "empty": "Aucun lieu enregistré pour le moment.",
     "store": "Les lieux sont enregistrés sur votre compte."
+  },
+  "rent": {
+    "title": "Louer un véhicule",
+    "request": "Réserver",
+    "name": "Votre nom",
+    "withDriver": "Avec chauffeur",
+    "noDriver": "Sans chauffeur",
+    "deposit": "Caution",
+    "cancel": "Annuler",
+    "submit": "Envoyer la demande",
+    "newRequest": "Nouvelle demande",
+    "pendingHint": "Le prestataire va confirmer votre demande."
+  },
+  "express": {
+    "title": "Envoi express",
+    "sender": "Expéditeur",
+    "receiver": "Destinataire",
+    "name": "Nom",
+    "destination": "Destination",
+    "size": "Taille du colis",
+    "addPhoto": "Ajouter une photo (optionnel)",
+    "photoAdded": "Photo ajoutée",
+    "fare": "Tarif",
+    "send": "Envoyer le colis",
+    "otp": "Code de livraison",
+    "otpHint": "Communiquez ce code au livreur à la livraison.",
+    "deliver": "Livrer",
+    "noParcels": "Aucun colis.",
+    "wrongOtp": "Code incorrect."
   }
 }
 
