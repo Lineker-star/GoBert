@@ -160,6 +160,14 @@ export type ExpressParcel = {
   created_at: string;
 };
 
+export type AISettings = {
+  enabled: boolean;
+  model: string;
+  system_prompt: string;
+  rate_limit: number;
+  usage: { requests: number; input_tokens: number; output_tokens: number };
+};
+
 type MockState = {
   providers: MockProvider[];
   bookings: MockBooking[];
@@ -169,6 +177,7 @@ type MockState = {
   rentals: RentalVehicle[];
   rentalRequests: RentalRequest[];
   parcels: ExpressParcel[];
+  aiSettings: AISettings;
 };
 
 const NAMES = [
@@ -263,6 +272,13 @@ function initialState(): MockState {
     rentals: buildRentals(providers),
     rentalRequests: [],
     parcels: [],
+    aiSettings: {
+      enabled: true,
+      model: "claude-sonnet-4-20250514",
+      system_prompt: "You are the GoBert assistant, a helpful mobility assistant for Bertoua, Cameroon.",
+      rate_limit: 20,
+      usage: { requests: 0, input_tokens: 0, output_tokens: 0 },
+    },
   };
 }
 
@@ -674,4 +690,25 @@ export function deliverParcel(id: string, otp: string): boolean {
 
 export function getParcelsForProvider(): ExpressParcel[] {
   return store.parcels.filter((p) => p.status === "requested" || p.status === "accepted");
+}
+
+// ---------------- AI settings ----------------
+
+export function getAISettings(): AISettings {
+  return store.aiSettings;
+}
+
+export function updateAISettings(patch: Partial<AISettings>): AISettings {
+  store.aiSettings = {
+    ...store.aiSettings,
+    ...patch,
+    usage: patch.usage ?? store.aiSettings.usage,
+  };
+  return store.aiSettings;
+}
+
+export function logAIUsage(inputTokens: number, outputTokens: number) {
+  store.aiSettings.usage.requests++;
+  store.aiSettings.usage.input_tokens += inputTokens;
+  store.aiSettings.usage.output_tokens += outputTokens;
 }

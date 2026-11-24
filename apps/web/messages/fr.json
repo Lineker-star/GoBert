@@ -204,6 +204,19 @@
     "deliver": "Livrer",
     "noParcels": "Aucun colis.",
     "wrongOtp": "Code incorrect."
+  },
+  "assistant": {
+    "title": "Assistant",
+    "welcome": "Bonjour ! Comment puis-je vous aider ?",
+    "placeholder": "Posez votre question…",
+    "offline": "Vous êtes hors ligne. Les messages seront envoyés à la reconnexion.",
+    "offlineReply": "Je suis hors ligne pour le moment. Réessayez dans un instant.",
+    "talkHuman": "Parler à un humain",
+    "quick": {
+      "register": "Comment inscrire ma moto ?",
+      "taxi": "Trouver un taxi près du marché",
+      "pricing": "Quels sont les tarifs ?"
+    }
   }
 }
 

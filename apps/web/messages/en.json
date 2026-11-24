@@ -204,6 +204,19 @@
     "deliver": "Deliver",
     "noParcels": "No parcels.",
     "wrongOtp": "Incorrect code."
+  },
+  "assistant": {
+    "title": "Assistant",
+    "welcome": "Hi! How can I help you?",
+    "placeholder": "Ask your question…",
+    "offline": "You are offline. Messages will be sent when you reconnect.",
+    "offlineReply": "I'm offline right now. Try again in a moment.",
+    "talkHuman": "Talk to a human",
+    "quick": {
+      "register": "How do I register my moto?",
+      "taxi": "Find me a taxi near the market",
+      "pricing": "What are the prices?"
+    }
   }
 }
 

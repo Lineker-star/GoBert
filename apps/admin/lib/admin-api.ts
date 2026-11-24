@@ -63,3 +63,27 @@ export async function getOverview(): Promise<Overview | null> {
   if (!res.ok) return null;
   return res.json();
 }
+
+export type AISettings = {
+  enabled: boolean;
+  model: string;
+  system_prompt: string;
+  rate_limit: number;
+  usage: { requests: number; input_tokens: number; output_tokens: number };
+};
+
+export async function getAISettings(): Promise<AISettings | null> {
+  const res = await fetch(`${WEB}/api/mock/admin/ai`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function updateAISettings(patch: Partial<AISettings>): Promise<AISettings | null> {
+  const res = await fetch(`${WEB}/api/mock/admin/ai`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}

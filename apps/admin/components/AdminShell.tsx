@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, Bot } from "lucide-react";
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -27,6 +27,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const nav = [
     { href: "/overview", label: "Vue d'ensemble", Icon: LayoutDashboard },
     { href: "/providers", label: "Prestataires", Icon: Users },
+    { href: "/ai", label: "Paramètres IA", Icon: Bot },
   ];
 
   const signOut = () => {
