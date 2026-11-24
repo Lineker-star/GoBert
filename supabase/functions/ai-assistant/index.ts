@@ -34,6 +34,32 @@ function detectLang(q: string): "fr" | "en" {
     : "fr";
 }
 
+// deterministic hash embedding (1536 dims) — production would use a real embedding model
+const EMBED_DIMS = 1536;
+function embed(text: string): number[] {
+  const vec = new Array<number>(EMBED_DIMS).fill(0);
+  const tokens = text.toLowerCase().match(/[a-zà-ÿ0-9]+/g) ?? [];
+  for (const t of tokens) {
+    let h = 0;
+    for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
+    vec[h % EMBED_DIMS] += 1;
+  }
+  let norm = 0;
+  for (const v of vec) norm += v * v;
+  norm = Math.sqrt(norm) || 1;
+  return vec.map((v) => v / norm);
+}
+const vecLiteral = (vec: number[]) => `[${vec.map((v) => v.toFixed(6)).join(",")}]`;
+
+// retrieve top 4 knowledge chunks via pgvector
+async function retrieveKnowledge(question: string): Promise<{ title: string; content: string }[]> {
+  const { data } = await sb.rpc("match_knowledge", {
+    query_embedding: vecLiteral(embed(question)),
+    match_count: 4,
+  });
+  return (data ?? []) as { title: string; content: string }[];
+}
+
 // ---------------- Tools ----------------
 async function search_providers(service: string, near = "Bertoua") {
   const { data } = await sb
@@ -110,11 +136,16 @@ Deno.serve(async (req) => {
       return json({ answer: fallbackAnswer(q, lang, toolResults), lang, tools: toolResults, tokens: { input: 0, output: 0 } });
     }
 
+    // retrieve top 4 knowledge chunks (pgvector)
+    const knowledge = await retrieveKnowledge(question ?? "");
+    const knowledgeContext = knowledge.map((k) => `### ${k.title}\n${k.content}`).join("\n\n");
+
     // call Claude with streaming
     const systemPrompt =
       `You are the GoBert assistant, a helpful mobility assistant for Bertoua, Cameroon. ` +
       `Answer in ${lang === "fr" ? "French" : "English"}. Be concise and friendly. ` +
-      `Use the provided tool results when relevant. Prices are in XAF.`;
+      `Use the provided tool results when relevant. Prices are in XAF.\n\n` +
+      `Knowledge base (top 4 chunks):\n${knowledgeContext}`;
 
     const messages = [
       ...(history ?? []).map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
