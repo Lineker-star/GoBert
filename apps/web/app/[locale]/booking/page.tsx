@@ -244,7 +244,7 @@ function BookingFlowInner() {
             <div className="w-14 h-14 rounded-full bg-grey overflow-hidden shrink-0">
               {provider?.photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={provider.photo} alt="" className="w-full h-full object-cover" />
+                <img src={provider.photo} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-charcoal/40">?</div>
               )}

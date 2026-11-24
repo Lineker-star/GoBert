@@ -92,7 +92,7 @@ export default function RentPage() {
           return (
             <div key={v.id} className="bg-white rounded-2xl shadow-sm overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={v.photo} alt="" className="w-full h-32 object-cover" />
+              <img src={v.photo} alt="" loading="lazy" decoding="async" className="w-full h-32 object-cover" />
               <div className="p-4">
                 <div className="flex items-center gap-2">
                   <Icon className="w-5 h-5 text-green" />

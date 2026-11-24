@@ -14,8 +14,23 @@ export default function DirectoryPage() {
 
   useEffect(() => {
     getDirectoryProviders()
-      .then(setProviders)
-      .catch(() => setProviders([]))
+      .then((list) => {
+        setProviders(list);
+        try {
+          localStorage.setItem("gobert:directory", JSON.stringify(list));
+        } catch {
+          // ignore
+        }
+      })
+      .catch(() => {
+        // offline: fall back to cached results
+        try {
+          const raw = localStorage.getItem("gobert:directory");
+          if (raw) setProviders(JSON.parse(raw));
+        } catch {
+          // ignore
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -45,7 +60,7 @@ export default function DirectoryPage() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-grey overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.photo} alt="" className="w-full h-full object-cover" />
+                  <img src={p.photo} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
                   <div className="text-sm font-bold text-charcoal">{p.display_name}</div>

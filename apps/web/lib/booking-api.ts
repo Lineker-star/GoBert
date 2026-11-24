@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { queueRequest } from "./offline-queue";
 
 const USE_MOCKS = typeof process !== "undefined" && process.env.NEXT_PUBLIC_USE_MOCKS === "true";
 
@@ -111,11 +112,17 @@ export async function createBooking(input: {
   dropoff: LatLngLabel;
 }): Promise<Booking> {
   if (USE_MOCKS) {
-    return mockFetch<Booking>("/api/mock/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
+    try {
+      return await mockFetch<Booking>("/api/mock/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+    } catch {
+      // offline: queue for background sync
+      await queueRequest({ url: "/api/mock/bookings", method: "POST", body: input });
+      throw new Error("queued");
+    }
   }
   const { data, error } = await supabase.rpc("create_booking", {
     p_passenger: input.passenger_id,

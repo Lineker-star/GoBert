@@ -3,6 +3,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import "../globals.css";
 
 const heading = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-heading" });
@@ -28,6 +29,7 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${heading.variable} ${body.variable}`}>
       <body className="bg-[var(--ivory)] text-[var(--charcoal)]">
         <NextIntlClientProvider messages={messages}>
+          <ServiceWorkerRegistrar />
           <AuthProvider>{children}</AuthProvider>
         </NextIntlClientProvider>
       </body>
