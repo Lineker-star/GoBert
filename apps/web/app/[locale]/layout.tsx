@@ -26,7 +26,7 @@ export default async function LocaleLayout({
   if (!locales.includes(locale)) notFound();
   const messages = await getMessages();
   return (
-    <html lang={locale} className={`${heading.variable} ${body.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${heading.variable} ${body.variable}`}>
       <body className="bg-[var(--ivory)] text-[var(--charcoal)]">
         <NextIntlClientProvider messages={messages}>
           <ServiceWorkerRegistrar />
