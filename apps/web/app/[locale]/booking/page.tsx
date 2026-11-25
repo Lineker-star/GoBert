@@ -111,11 +111,14 @@ function BookingFlowInner() {
 
   if (!dropoff) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="text-center">
-          <MapPinPlaceholder />
-          <p className="text-charcoal/60 mt-2">{t("booking.pickFirst")}</p>
-          <button onClick={() => router.back()} className="mt-4 text-green font-medium">
+      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-4">
+            <Star className="w-8 h-8 text-green opacity-0" />
+            <span className="absolute text-green text-2xl">📍</span>
+          </div>
+          <p className="text-charcoal/60 mt-2 text-lg">{t("booking.pickFirst")}</p>
+          <button onClick={() => router.back()} className="mt-4 text-green font-medium hover:underline transition-colors">
             ← {t("nav.home")}
           </button>
         </div>
@@ -125,9 +128,9 @@ function BookingFlowInner() {
 
   if (step === "choose") {
     return (
-      <div className="min-h-screen bg-ivory p-4">
+      <div className="min-h-screen bg-ivory p-4 sm:p-6">
         <div className="max-w-sm mx-auto space-y-4">
-          <div className="bg-white rounded-2xl shadow-sm p-5">
+          <div className="bg-white rounded-2xl shadow-card p-5">
             <div className="flex items-start gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-green mt-2 shrink-0" />
               <div>
@@ -144,7 +147,7 @@ function BookingFlowInner() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm p-5">
+          <div className="bg-white rounded-2xl shadow-card p-5">
             <h2 className="text-sm font-semibold text-charcoal/70 uppercase tracking-wider mb-3">
               {t("booking.chooseVehicle")}
             </h2>
@@ -153,7 +156,7 @@ function BookingFlowInner() {
                 <button
                   key={type}
                   onClick={() => setVehicle(type)}
-                  className={`flex items-center gap-2 rounded-xl border p-3 text-left transition ${
+                  className={`flex items-center gap-2 rounded-xl border p-3 text-left transition-all duration-200 ${
                     vehicle === type ? "border-green bg-green/5" : "border-grey"
                   }`}
                 >
@@ -191,7 +194,7 @@ function BookingFlowInner() {
           <button
             onClick={confirm}
             disabled={creating || !estimate}
-            className="w-full bg-orange text-white rounded-xl py-3 font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-orange text-white rounded-xl py-3 font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange/25 hover:shadow-orange/40 transition-all active:scale-95"
           >
             {creating && <Loader2 className="w-4 h-4 animate-spin" />}
             {t("booking.confirm")}
@@ -203,7 +206,7 @@ function BookingFlowInner() {
 
   if (step === "looking") {
     return (
-      <div className="min-h-screen bg-ivory flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-ivory flex flex-col items-center justify-center p-4 sm:p-6">
         <div className="relative w-24 h-24 mb-6">
           <div className="absolute inset-0 rounded-full bg-green/10 animate-ping" />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -214,7 +217,7 @@ function BookingFlowInner() {
         <p className="text-sm text-charcoal/50 mb-8 text-center">{t("booking.lookingHint")}</p>
         <button
           onClick={cancel}
-          className="border border-grey rounded-xl px-6 py-2 text-sm font-medium text-charcoal"
+          className="border border-grey rounded-xl px-6 py-2 text-sm font-medium text-charcoal hover:bg-grey/50 transition-colors active:scale-95"
         >
           {t("booking.cancel")}
         </button>
@@ -231,7 +234,7 @@ function BookingFlowInner() {
     ];
     return (
       <div className="min-h-screen bg-ivory flex flex-col">
-        <div className="h-[40vh] relative bg-white overflow-hidden">
+        <div className="h-[40vh] sm:h-[35vh] relative bg-white overflow-hidden">
           <MapContainer
             center={[booking.dropoff.lng, booking.dropoff.lat]}
             zoom={13}
@@ -243,7 +246,6 @@ function BookingFlowInner() {
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full bg-grey overflow-hidden shrink-0">
               {provider?.photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img src={provider.photo} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-charcoal/40">?</div>
@@ -289,7 +291,7 @@ function BookingFlowInner() {
               <div className="text-xs text-charcoal/50 uppercase">{t("booking.fare")}</div>
               <div className="text-xl font-bold text-green">{booking.fare_estimate_xaf.toLocaleString()} XAF</div>
             </div>
-            <button onClick={cancel} className="flex items-center gap-1 text-orange text-sm font-medium">
+            <button onClick={cancel} className="flex items-center gap-1 text-orange text-sm font-medium hover:text-orange-dark transition-colors">
               <X className="w-4 h-4" />
               {t("booking.cancel")}
             </button>
@@ -301,7 +303,7 @@ function BookingFlowInner() {
 
   if (step === "completed" && booking) {
     return (
-      <div className="min-h-screen bg-ivory flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-ivory flex flex-col items-center justify-center p-4 sm:p-6">
         <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center mb-4">
           <CheckCircle2 className="w-10 h-10 text-green" />
         </div>
@@ -310,7 +312,7 @@ function BookingFlowInner() {
         <p className="text-xs text-charcoal/50 mt-1">{t("booking.cashCollected")}</p>
 
         {!ratingDone ? (
-          <div className="w-full max-w-sm mt-8 bg-white rounded-2xl shadow-sm p-5">
+          <div className="w-full max-w-sm mt-8 bg-white rounded-2xl shadow-card p-5">
             <div className="text-sm font-semibold text-charcoal/70 mb-3 text-center">{t("booking.rate")}</div>
             <div className="flex justify-center gap-1 mb-4">
               {[1, 2, 3, 4, 5].map((n) => (
@@ -323,13 +325,13 @@ function BookingFlowInner() {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder={t("booking.comment")}
-              className="w-full border border-grey rounded-xl p-3 text-sm focus:outline-none focus:border-green"
+              className="w-full border border-grey rounded-xl p-3 text-sm focus:outline-none focus:border-green focus:ring-2 focus:ring-green/20"
               rows={2}
             />
             <button
               onClick={submitRating}
               disabled={stars === 0}
-              className="w-full mt-3 bg-green text-white rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50"
+              className="w-full mt-3 bg-green text-white rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50 hover:shadow-glow transition-all"
             >
               {t("booking.submitRating")}
             </button>
@@ -355,7 +357,7 @@ function MapPinPlaceholder() {
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-6 h-6 text-green animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-4"><Loader2 className="w-6 h-6 text-green animate-spin" /></div>}>
       <BookingFlowInner />
     </Suspense>
   );

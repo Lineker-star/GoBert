@@ -90,27 +90,27 @@ export default function AuthPage() {
   const errorMsg = error ? t(`auth.errors.${error}`) : null;
 
   const features = [
-    { icon: <MapPin className="w-4 h-4" />, text: "Bertoua & régions Est, Adamoua, Nord, Extrême-Nord" },
-    { icon: <Clock className="w-4 h-4" />, text: "Disponible 24h/24, 7j/7" },
-    { icon: <ShieldCheck className="w-4 h-4" />, text: "Prestataires vérifiés par l'administration" },
-    { icon: <MessageCircle className="w-4 h-4" />, text: "Support WhatsApp intégré" },
+    { icon: <MapPin className="w-5 h-5" />, title: { en: "Wide coverage", fr: "Grande couverture" }, desc: { en: "Bertoua & regions Est, Adamoua, Nord, Extrême-Nord", fr: "Bertoua & régions Est, Adamoua, Nord, Extrême-Nord" } },
+    { icon: <Clock className="w-5 h-5" />, title: { en: "24/7 availability", fr: "Disponible 24h/24" }, desc: { en: "Rides and deliveries around the clock", fr: "Courses et livraisons à toute heure" } },
+    { icon: <ShieldCheck className="w-5 h-5" />, title: { en: "Verified providers", fr: "Prestataires vérifiés" }, desc: { en: "Background-checked drivers and insured vehicles", fr: "Chauffeurs vérifiés et véhicules assurés" } },
+    { icon: <MessageCircle className="w-5 h-5" />, title: { en: "WhatsApp support", fr: "Support WhatsApp" }, desc: { en: "Help when you need it, in your language", fr: "Aide quand vous en avez besoin, dans votre langue" } },
   ];
 
   return (
-    <main className="min-h-screen relative overflow-hidden bg-gradient-to-br from-forest via-green to-green/80">
+    <main className="min-h-screen relative overflow-hidden bg-gradient-to-br from-forest via-green to-green/90">
       {/* Decorative background */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-orange rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-ivory rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/20 rounded-full blur-3xl" />
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-orange rounded-full blur-3xl md:w-96 md:h-96" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-ivory rounded-full blur-3xl md:w-[400px] md:h-[400px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/20 rounded-full blur-3xl md:w-[800px] md:h-[800px]" />
       </div>
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4 md:p-8">
-        <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 items-center">
+        <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left: Branding */}
-          <div className="text-white space-y-6 hidden md:block">
+          <div className="text-white space-y-8 hidden lg:block">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-orange flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-2xl bg-orange flex items-center justify-center shadow-lg shadow-orange/40">
                 <Truck className="w-7 h-7 text-white" />
               </div>
               <div>
@@ -118,30 +118,33 @@ export default function AuthPage() {
                 <p className="text-white/70 text-sm">Mobilité &amp; logistique au Cameroun</p>
               </div>
             </div>
-            <h2 className="text-4xl font-bold leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold leading-tight">
               Votre trajet,<br />
               <span className="text-orange">en un clic.</span>
             </h2>
-            <p className="text-white/80 text-lg leading-relaxed">
+            <p className="text-white/80 text-lg leading-relaxed max-w-md">
               Motos, taxis, tricycles, camions, location de véhicules et livraison express —
               tout ce dont vous avez besoin, à portée de main, même avec une connexion lente.
             </p>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {features.map((f, i) => (
-                <li key={i} className="flex items-center gap-3 text-white/90">
-                  <span className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0">{f.icon}</span>
-                  <span className="text-sm">{f.text}</span>
+                <li key={i} className="flex items-center gap-4 text-white/90 animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
+                  <span className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center shrink-0">{f.icon}</span>
+                  <div>
+                    <div className="font-medium">{f.title.en}</div>
+                    <div className="text-sm text-white/70">{f.desc.en}</div>
+                  </div>
                 </li>
               ))}
             </ul>
-            <div className="flex items-center gap-2 text-xs text-white/60 pt-4">
-              <Star className="w-3 h-3 fill-orange text-orange" />
-              <span>Noté 4.8/5 par nos utilisateurs</span>
+            <div className="flex items-center gap-3 text-xs text-white/60 pt-4">
+              <Star className="w-4 h-4 fill-orange text-orange" />
+              <span>Rated 4.8/5 by our users</span>
             </div>
           </div>
 
           {/* Right: Auth card */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-10 border border-white/20">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 md:p-10 border border-white/30 shadow-glow">
             {/* Mobile logo */}
             <div className="flex items-center gap-3 mb-6 md:hidden">
               <div className="w-10 h-10 rounded-xl bg-orange flex items-center justify-center">
@@ -160,48 +163,50 @@ export default function AuthPage() {
                 <div className="space-y-3">
                   <button
                     onClick={() => { setRole("user"); setStep("phone"); }}
-                    className="w-full group flex items-center gap-4 p-4 rounded-2xl border-2 border-grey hover:border-green bg-white hover:bg-green/5 transition-all text-left"
+                    className="w-full group flex items-center gap-4 p-4 rounded-2xl border-2 border-grey hover:border-green bg-white hover:bg-green/5 transition-all text-left active:scale-95"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-green/10 flex items-center justify-center text-green group-hover:bg-green group-hover:text-white transition">
+                    <div className="w-12 h-12 rounded-xl bg-green/10 flex items-center justify-center text-green group-hover:bg-green group-hover:text-white transition-all">
                       <User className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-charcoal">Utilisateur</div>
                       <div className="text-xs text-charcoal/60">Réserver des courses, livraisons et locations</div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-charcoal/30 group-hover:text-green transition" />
+                    <ChevronRight className="w-5 h-5 text-charcoal/30 group-hover:text-green transition-colors" />
                   </button>
 
                   <button
                     onClick={() => { setRole("provider"); setStep("phone"); }}
-                    className="w-full group flex items-center gap-4 p-4 rounded-2xl border-2 border-grey hover:border-orange bg-white hover:bg-orange/5 transition-all text-left"
+                    className="w-full group flex items-center gap-4 p-4 rounded-2xl border-2 border-grey hover:border-orange bg-white hover:bg-orange/5 transition-all text-left active:scale-95"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-orange/10 flex items-center justify-center text-orange group-hover:bg-orange group-hover:text-white transition">
+                    <div className="w-12 h-12 rounded-xl bg-orange/10 flex items-center justify-center text-orange group-hover:bg-orange group-hover:text-white transition-all">
                       <Truck className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-charcoal">Prestataire</div>
                       <div className="text-xs text-charcoal/60">Proposer vos services et gagner de l&apos;argent</div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-charcoal/30 group-hover:text-orange transition" />
+                    <ChevronRight className="w-5 h-5 text-charcoal/30 group-hover:text-orange transition-colors" />
                   </button>
                 </div>
 
-                <div className="relative">
+                <div className="relative mt-8">
                   <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-grey" /></div>
-                  <div className="relative flex justify-center text-xs"><span className="bg-white px-3 text-charcoal/40">ou</span></div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-3 text-charcoal/40">ou</span>
+                  </div>
                 </div>
 
                 <button
                   onClick={continueAnonymous}
                   disabled={busy}
-                  className="w-full border border-grey rounded-xl py-3 font-medium text-charcoal hover:bg-grey/30 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full border border-grey rounded-xl py-3 font-medium text-charcoal hover:bg-grey/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
                 >
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-green" />}
                   {t("auth.continueAnonymous")}
                 </button>
 
-                <p className="text-[11px] text-charcoal/40 text-center">
+                <p className="text-[11px] text-charcoal/40 text-center mt-4">
                   En continuant, vous acceptez nos conditions d&apos;utilisation et notre politique de confidentialité.
                 </p>
               </div>
@@ -209,7 +214,7 @@ export default function AuthPage() {
 
             {step === "phone" && (
               <div className="space-y-5">
-                <button onClick={() => { setStep("role"); setRole(null); }} className="flex items-center gap-1 text-sm text-charcoal/60 hover:text-green transition">
+                <button onClick={() => { setStep("role"); setRole(null); }} className="flex items-center gap-1 text-sm text-charcoal/60 hover:text-green transition-colors">
                   <ArrowLeft className="w-4 h-4" /> Retour
                 </button>
                 <div>
@@ -223,7 +228,7 @@ export default function AuthPage() {
                   <select
                     value={prefix}
                     onChange={(e) => setPrefix(e.target.value)}
-                    className="border border-grey rounded-xl px-2 py-3 text-sm bg-white focus:outline-none focus:border-green"
+                    className="border border-grey rounded-xl px-2 py-3 text-sm bg-white focus:outline-none focus:border-green focus:ring-2 focus:ring-green/20"
                   >
                     {PREFIXES.map((p) => (
                       <option key={p.code} value={p.code}>{p.label}</option>
@@ -243,7 +248,7 @@ export default function AuthPage() {
                 <button
                   onClick={sendOtp}
                   disabled={busy || !phoneValid}
-                  className="w-full bg-gradient-to-r from-green to-forest text-white rounded-xl py-3.5 font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-green/25 hover:shadow-green/40 transition"
+                  className="w-full bg-gradient-to-r from-green to-forest text-white rounded-xl py-3.5 font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-glow hover:shadow-green/40 transition-all active:scale-95"
                 >
                   {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
                   {busy ? t("auth.sending") : t("auth.sendOtp")}
@@ -257,7 +262,7 @@ export default function AuthPage() {
 
             {step === "otp" && (
               <div className="space-y-5">
-                <button onClick={() => setStep("phone")} className="flex items-center gap-1 text-sm text-charcoal/60 hover:text-green transition">
+                <button onClick={() => setStep("phone")} className="flex items-center gap-1 text-sm text-charcoal/60 hover:text-green transition-colors">
                   <ArrowLeft className="w-4 h-4" /> {t("auth.changeNumber")}
                 </button>
                 <div>
@@ -277,19 +282,19 @@ export default function AuthPage() {
                 <button
                   onClick={verify}
                   disabled={busy || otp.length < 6}
-                  className="w-full bg-gradient-to-r from-green to-forest text-white rounded-xl py-3.5 font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-green/25"
+                  className="w-full bg-gradient-to-r from-green to-forest text-white rounded-xl py-3.5 font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-glow hover:shadow-green/40 transition-all active:scale-95"
                 >
                   {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                   {busy ? t("auth.verifying") : t("auth.verify")}
                 </button>
                 <div className="flex items-center justify-between text-sm">
-                  <button onClick={() => setStep("phone")} className="text-green font-medium hover:underline">
+                  <button onClick={() => setStep("phone")} className="text-green font-medium hover:underline transition-colors">
                     {t("auth.changeNumber")}
                   </button>
                   <button
                     onClick={resend}
                     disabled={resendIn > 0 || busy}
-                    className="text-green font-medium disabled:text-charcoal/40 hover:underline"
+                    className="text-green font-medium disabled:text-charcoal/40 hover:underline transition-colors"
                   >
                     {resendIn > 0 ? t("auth.resendIn", { seconds: resendIn }) : t("auth.resend")}
                   </button>

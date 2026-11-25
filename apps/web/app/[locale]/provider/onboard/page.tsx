@@ -132,8 +132,8 @@ export default function OnboardPage() {
   const progress = ((step + 1) / STEPS.length) * 100;
 
   return (
-    <div className="min-h-screen bg-ivory p-4">
-      <div className="max-w-md mx-auto space-y-4">
+    <div className="min-h-screen bg-ivory p-4 sm:p-6">
+      <div className="max-w-sm sm:max-w-md mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-green">{t("onboard.title")}</h1>
           <span className="text-xs text-charcoal/50">

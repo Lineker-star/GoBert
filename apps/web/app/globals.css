@@ -2,30 +2,141 @@
 
 @theme {
   --color-green: #087C55;
+  --color-green-dark: #065F46;
   --color-forest: #123D32;
   --color-orange: #F28C28;
+  --color-orange-dark: #E87A1C;
   --color-ivory: #F7F5EF;
+  --color-ivory-dark: #EDE5D6;
   --color-charcoal: #242B29;
+  --color-charcoal-soft: #4A5552;
   --color-grey: #E8ECE9;
+  --color-grey-light: #F3F4F6;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
   --font-heading: "Plus Jakarta Sans", sans-serif;
   --font-body: "Inter", sans-serif;
+  --radius-sm: 0.5rem;
   --radius-card: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-glow: 0 0 20px rgb(8 124 85 / 0.15);
+  --shadow-glow-orange: 0 0 20px rgb(242 140 40 / 0.15);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body {
-  background: var(--color-ivory);
-  color: var(--color-charcoal);
-  font-family: var(--font-body);
+@layer base {
+  body {
+    background: var(--color-ivory);
+    color: var(--color-charcoal);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-charcoal);
+    letter-spacing: -0.025em;
+  }
+  a {
+    color: var(--color-green);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+  a:hover {
+    color: var(--color-green-dark);
+  }
+  input, select, textarea {
+    font-family: inherit;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
 }
-h1, h2, h3 { font-family: var(--font-heading); }
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .shadow-glow-orange {
+    box-shadow: var(--shadow-glow-orange);
+  }
+}
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.animate-fade-in-up { animation: fadeInUp 0.5s ease-out both; }
-.animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgb(8 124 85 / 0.7); }
+  70% { box-shadow: 0 0 0 10px rgb(8 124 85 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(8 124 85 / 0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.6s ease-out both; }
+.animate-fade-in { animation: fadeIn 0.5s ease-out both; }
+.animate-slide-in-bottom { animation: slideInFromBottom 0.5s ease-out both; }
+.animate-scale-in { animation: scaleIn 0.4s ease-out both; }
+.animate-pulse-ring { animation: pulse-ring 2s infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+@media (max-width: 640px) {
+  .container-mobile {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+@media (min-width: 641px) and (max-width: 1023px) {
+  .container-tablet {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}

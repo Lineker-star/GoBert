@@ -24,7 +24,6 @@ export default function Home() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(false);
@@ -37,7 +36,6 @@ export default function Home() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const tmr = setTimeout(() => {
       if (!mapReady && !mapError) setMapError(true);
     }, 6000);
@@ -105,8 +103,8 @@ export default function Home() {
     <div className="relative min-h-screen bg-ivory">
       <OfflineBanner onRetry={retryProviders} />
 
-      {/* Map panel — full height on mobile, 2/3 on desktop via CSS */}
-      <div className="relative bg-white overflow-hidden h-full w-full md:h-screen md:w-2/3">
+      {/* Map panel */}
+      <div className="relative bg-white overflow-hidden h-screen lg:h-[calc(100vh-0px)] lg:w-2/3">
         {mapError ? (
           <ErrorState
             message={t("map.failed")}
@@ -146,8 +144,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sheet panel — hidden on mobile, 1/3 on desktop via CSS */}
-      <div className="w-full h-full bg-white border-l border-grey p-6 overflow-y-auto md:w-1/3 md:block hidden md:flex">
+      {/* Sheet panel */}
+      <div className="lg:w-1/3 lg:block hidden lg:flex w-full h-full bg-white border-l border-grey p-6 overflow-y-auto">
         <SheetContent
           t={t}
           searchOpen={searchOpen}
@@ -169,7 +167,7 @@ export default function Home() {
       </div>
 
       {/* Mobile bottom sheet */}
-      <div className="md:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl p-4 max-h-[52vh] z-30">
+      <div className="lg:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl p-4 max-h-[55vh] z-30">
         <SheetContent
           t={t}
           searchOpen={searchOpen}
@@ -247,7 +245,7 @@ function SheetContent({
         </label>
         <button
           onClick={openSearch}
-          className="text-sm font-medium text-green hover:underline"
+          className="text-sm font-medium text-green hover:underline transition-colors"
         >
           {t("search.pickDestination")}
         </button>
@@ -259,7 +257,7 @@ function SheetContent({
           readOnly
           onClick={openSearch}
           placeholder={t("search.placeholder")}
-          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-grey bg-white/80 text-charcoal cursor-pointer focus:outline-none"
+          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-grey bg-white/80 text-charcoal cursor-pointer focus:outline-none focus:border-green focus:ring-2 focus:ring-green/20"
         />
         {dropoff && (
           <div className="absolute right-3 top-2 text-[10px] text-green font-medium bg-green/10 px-2 py-0.5 rounded">
