@@ -9,7 +9,9 @@
 - [x] `supabase/tests/e2e_rollback.sql`: 41/41 checks on the live DB (always rolls back). `apps/web/scripts/shoot-live.mjs`: 14/14 live UI checks.
 - [ ] SMS provider credentials (Twilio/Vonage) — Dashboard → Authentication → Phone.
 - [ ] Custom SMTP for email (built-in Supabase email is rate-limited and meant for testing).
-- [ ] First admin account (step 3 below) and production domain in redirect URLs.
+- [x] First admin account: `tanglineker@gmail.com` (role admin; 2FA is set up on first admin login).
+- [ ] Apply `202611260005_admin_stats.sql` (admin trend charts; the CLI lost access to the project before it could be applied).
+- [ ] Production domain in Site URL / redirect URLs — see `docs/DEPLOY_VERCEL.md`.
 
 The app runs on the in-memory demo backend while `NEXT_PUBLIC_USE_MOCKS=true`.
 These steps switch it to the real Supabase project (`dpziqhptuvjqbikrvcju`).

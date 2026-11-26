@@ -1,4 +1,5 @@
 // Live smoke test against the real Supabase project (no passwords involved).
+//   READ_ONLY=1 skips creating (and cancelling) a real guest trip.
 //   SHOT_BASE=http://localhost:3100 ADMIN_BASE=http://localhost:3101 ADMIN_PATH=/ops-… node scripts/shoot-live.mjs
 import { chromium } from "@playwright/test";
 import { mkdirSync } from "fs";
@@ -46,10 +47,14 @@ const browser = await chromium.launch();
   await page.getByRole("button", { name: /Marché Central/ }).first().click();
   await page.getByLabel("Arrivée").fill("Hôpital");
   await page.getByRole("button", { name: /Hôpital Régional/ }).first().click();
-  await page.waitForTimeout(6000);
-  const price = await page.getByRole("button", { name: /^Réserver Moto · / }).textContent().catch(() => "");
+  const priceBtn = page.getByRole("button", { name: /^Réserver Moto · .*\d/ }).first();
+  await priceBtn.waitFor({ timeout: 6000 }).catch(() => undefined);
+  const price = await priceBtn.textContent().catch(() => "");
   check("fare from estimate_trip()", /\d/.test(price ?? ""), (price ?? "").trim());
   await shot(page, "01-live-quote");
+  if (process.env.READ_ONLY) {
+    check("guest booking skipped (READ_ONLY)", true);
+  } else {
   await page.getByRole("button", { name: /^Réserver Moto/ }).click();
   let booked = false;
   try {
@@ -70,6 +75,7 @@ const browser = await chromium.launch();
     await page.waitForTimeout(4000);
     check("guest can cancel own trip (set_trip_status)", (await page.locator("text=Course annulée").count()) > 0);
     await shot(page, "03-live-cancelled");
+  }
   }
   // Directory from the database; guests never get phone numbers
   await page.goto(`${BASE}/fr/directory`, { waitUntil: "networkidle" });

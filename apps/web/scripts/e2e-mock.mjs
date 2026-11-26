@@ -126,7 +126,7 @@ const phoneCtx = () =>
   await page.getByRole("button", { name: /Marché Central/ }).first().click();
   await page.getByLabel("Arrivée").fill("Hôpital");
   await page.getByRole("button", { name: /Hôpital Régional/ }).first().click();
-  const book = page.getByRole("button", { name: /^Réserver .*d/ }).first();
+  const book = page.getByRole("button", { name: /^Réserver .*\d/ }).first();
   await book.waitFor({ timeout: 4000 }).catch(() => undefined); // a price must show within 4 s
   check("fare shown before booking", /\d/.test((await book.textContent().catch(() => "")) ?? ""), ((await book.textContent().catch(() => "")) ?? "").trim());
   await book.click();
@@ -167,21 +167,43 @@ for (const [kind, label, method] of [["rider", /Rider/, "sms"], ["business", /Pr
   await shot(page, `03-${kind}-onboard`);
   for (const p of ["/fr/dashboard", "/fr/profile", "/fr/onboard"]) await visit(page, kind, p, { mobile: true });
   check(`unverified ${kind} sees the verification status`, (await page.goto(`${BASE}/fr/dashboard`, { waitUntil: "networkidle" }), await page.waitForTimeout(2000), (await page.locator("text=/vérification|Vérification|dossier/").count()) > 0));
-  await ctx.close();
-}
 
-// 5. Approved rider and business (seed accounts): dashboards and their pages, desktop
-for (const [kind, id, phone] of [["rider", "u-237690001122", "+237690001122"], ["business", "u-237677889900", "+237677889900"]]) {
-  const ctx = await browser.newContext({ viewport: { width: 1366, height: 860 }, geolocation: { latitude: 4.5776, longitude: 13.6852 }, permissions: ["geolocation"] });
-  const page = await ctx.newPage();
-  watch(page, `approved-${kind}`);
-  await page.goto(`${BASE}/fr/auth`, { waitUntil: "domcontentloaded" });
-  await page.evaluate((s) => localStorage.setItem("gobert:session", JSON.stringify(s)), { id, phone, anonymous: false });
-  for (const p of ["/fr/dashboard", "/fr/trips", "/fr/profile", "/fr/directory", "/fr/rent", "/fr/assistant", "/en/dashboard"]) await visit(page, kind, p);
-  await page.goto(`${BASE}/fr/dashboard`, { waitUntil: "networkidle" });
-  await page.waitForTimeout(2500);
-  await shot(page, `04-${kind}-dashboard`);
-  check(`${kind} dashboard renders`, (await page.locator("main").innerText()).length > 50);
+  if (kind === "rider") {
+    // Full lifecycle: the new rider's application is submitted, the admin approves it,
+    // and the rider's dashboard switches to the live one (go online, earnings).
+    const session = await page.evaluate(() => JSON.parse(localStorage.getItem("gobert:session") || "null"));
+    const api = (path, body) =>
+      fetch(`${BASE}${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => ({})) }));
+    const doc = (type) => ({ id: type, type, name: `${type}.jpg`, size: 1200, data_url: "data:image/png;base64,iVBORw0KGgo=" });
+    const draft = await api("/api/mock/registration", {
+      user_id: session.id,
+      step: 5,
+      data: {
+        kind: "rider",
+        full_name: "Eric Mbah",
+        phone: session.phone,
+        city: "Bertoua",
+        vehicle_type: "moto",
+        brand: "Sanya",
+        model: "SY 125",
+        plate: "ES 123 AB",
+        color: "Rouge",
+        services: [{ type: "moto", base_price_xaf: 300, zones: ["Bertoua"] }],
+        documents: [doc("id_card"), doc("license"), doc("registration")],
+      },
+    });
+    const submitted = await api("/api/mock/registration/submit", { draft_id: draft.json.id });
+    check("rider application submitted", submitted.status === 200, String(submitted.status));
+    const decided = await api(`/api/mock/admin/providers/${submitted.json.id}/decision`, { decision: "approve" });
+    check("admin approves the rider", decided.status === 200, String(decided.status));
+    await page.goto(`${BASE}/fr/dashboard`, { waitUntil: "networkidle" });
+    const live = await page.locator("text=Vous êtes hors ligne").first().waitFor({ timeout: 20000 }).then(() => true, () => false);
+    check("approved rider gets the live dashboard", live);
+    check("rider sees the 7-day earnings chart", (await page.locator("text=Mes gains sur 7 jours").count()) > 0);
+    await shot(page, "04-rider-approved-dashboard");
+    const directory = await fetch(`${BASE}/api/mock/providers`).then((r) => r.json()).catch(() => []);
+    check("approved rider is now visible to customers", JSON.stringify(directory).includes("ES 123 AB") || JSON.stringify(directory).includes("Eric Mbah"));
+  }
   await ctx.close();
 }
 
@@ -203,9 +225,11 @@ for (const [kind, id, phone] of [["rider", "u-237690001122", "+237690001122"], [
   await review.waitFor({ timeout: 15000 }).catch(() => undefined);
   if (check("admin queue lists the new applications", (await review.count()) > 0)) {
     await review.click();
-    await page.waitForTimeout(2500);
+    await page.waitForURL((u) => /providers\/(?!new)[^/]+$/.test(u.pathname), { timeout: 30000 }).catch(() => undefined);
+    // The decision buttons prove the review page rendered with its data.
+    const decided = await page.getByRole("button", { name: /Approuver/ }).first().waitFor({ timeout: 30000 }).then(() => true, () => false);
     await shot(page, "05-admin-review");
-    check("admin opens an application", /providers\/[^/]+$/.test(new URL(page.url()).pathname));
+    check("admin opens an application", decided, new URL(page.url()).pathname);
   }
   await page.goto(`${ADMIN}${ADMIN_PATH}/overview`, { waitUntil: "networkidle" });
   await page.waitForTimeout(2000);

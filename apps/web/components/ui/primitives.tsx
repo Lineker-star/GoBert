@@ -329,9 +329,9 @@ export function Stat({ label, value, icon, tone = "green" }: { label: string; va
   return (
     <Card className="p-4">
       <div className="flex items-center gap-3">
-        {icon && <span className={cx("flex h-10 w-10 items-center justify-center rounded-xl", iconTone)}>{icon}</span>}
+        {icon && <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", iconTone)}>{icon}</span>}
         <div className="min-w-0">
-          <p className="text-xs font-medium text-charcoal/55 truncate">{label}</p>
+          <p className="text-xs font-medium leading-tight text-charcoal/55 line-clamp-2">{label}</p>
           <p className="text-lg font-bold text-charcoal truncate">{value}</p>
         </div>
       </div>
