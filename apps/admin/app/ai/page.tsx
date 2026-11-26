@@ -24,6 +24,7 @@ export default function AISettingsPage() {
       model: settings.model,
       system_prompt: settings.system_prompt,
       rate_limit: settings.rate_limit,
+      id: settings.id,
     });
     if (updated) setSettings(updated);
     setSaving(false);
@@ -35,9 +36,9 @@ export default function AISettingsPage() {
 
   return (
     <AdminShell>
-      <h1 className="text-xl font-bold text-green mb-6">Paramètres IA</h1>
+      <h1 className="text-2xl font-extrabold text-charcoal mb-6">Assistant IA</h1>
 
-      <div className="bg-white rounded-2xl shadow-sm p-5 space-y-4 max-w-2xl">
+      <div className="bg-white rounded-2xl border border-grey p-5 space-y-4 max-w-2xl">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm font-semibold text-charcoal">Assistant IA</div>
@@ -70,6 +71,7 @@ export default function AISettingsPage() {
           />
         </div>
 
+        {settings.rate_limit !== undefined && (
         <div>
           <label className="text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Limite (requêtes/heure)</label>
           <input
@@ -79,13 +81,15 @@ export default function AISettingsPage() {
             className="w-full border border-grey rounded-xl px-3 py-2 text-sm mt-1"
           />
         </div>
+        )}
 
         <button onClick={save} disabled={saving} className="bg-green text-white rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50">
           {saving ? "Enregistrement…" : saved ? "Enregistré" : "Enregistrer"}
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm p-5 mt-4 max-w-2xl">
+      {settings.usage && (
+      <div className="bg-white rounded-2xl border border-grey p-5 mt-4 max-w-2xl">
         <h2 className="text-sm font-semibold text-charcoal/70 uppercase tracking-wider mb-3">Utilisation</h2>
         <div className="grid grid-cols-3 gap-4">
           <Stat label="Requêtes" value={settings.usage.requests} />
@@ -93,6 +97,7 @@ export default function AISettingsPage() {
           <Stat label="Tokens sortie" value={settings.usage.output_tokens} />
         </div>
       </div>
+      )}
     </AdminShell>
   );
 }

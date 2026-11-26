@@ -1,12 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { acceptBooking, declineBooking } from "@/lib/mock-store";
+import { json, bad, body, type RouteCtx } from "@/lib/api-helpers";
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: RouteCtx) {
   const { id } = await params;
-  const body = await req.json().catch(() => ({}));
-  const providerId = body.provider_id;
-  if (!providerId) return NextResponse.json({ error: "missing provider_id" }, { status: 400 });
-  const won = acceptBooking(id, providerId);
-  if (body.decline) declineBooking(id, providerId);
-  return NextResponse.json({ won });
+  const b = await body<{ provider_id?: string; decline?: boolean }>(req);
+  if (!b.provider_id) return bad("missing provider_id");
+  if (b.decline) {
+    declineBooking(id, b.provider_id);
+    return json({ won: false });
+  }
+  return json({ won: acceptBooking(id, b.provider_id) });
 }

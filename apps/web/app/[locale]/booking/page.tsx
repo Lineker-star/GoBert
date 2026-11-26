@@ -1,364 +1,499 @@
 "use client";
-import { useState, useEffect, useCallback, Suspense } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Bike, Car, Truck, Phone, X, Star, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, Banknote, CircleCheck, MessageCircle, Phone, Share2, Smartphone, Star, X } from "lucide-react";
 import MapContainer from "@/components/map/MapContainer";
+import { Alert, Avatar, Badge, Button, Card, Input, PageLoader, RouteLine, STATUS_TONE, Textarea, cx } from "@/components/ui/primitives";
+import { ServiceIcon } from "@/components/ui/brand";
+import { useAuth } from "@/lib/auth";
 import { useBooking } from "@/hooks/useBooking";
 import {
-  estimateFare,
   createBooking,
-  setBookingStatus,
+  estimateFare,
   rateBooking,
-  getProvider,
-  type VehicleType,
+  setBookingStatus,
   type Estimate,
-  type Booking,
-  type DirectoryProvider,
+  type LatLngLabel,
+  type PaymentMethod,
 } from "@/lib/booking-api";
+import { RIDER_VEHICLES, type RiderVehicle } from "@/lib/domain";
 import { BERTOUA } from "@/lib/supabase";
+import { formatKm, formatXAF, whatsappLink } from "@/lib/format";
+import { getRoute } from "@/lib/routing";
+import { ApiError } from "@/lib/api";
 
-type Step = "choose" | "looking" | "accepted" | "completed";
-
-const VEHICLES: { type: VehicleType; Icon: React.ElementType }[] = [
-  { type: "moto", Icon: Bike },
-  { type: "taxi", Icon: Car },
-  { type: "tricycle", Icon: Car },
-  { type: "truck", Icon: Truck },
+const PAYMENTS: { key: PaymentMethod; icon: React.ElementType; tone: string }[] = [
+  { key: "cash", icon: Banknote, tone: "bg-green/10 text-green" },
+  { key: "mtn_momo", icon: Smartphone, tone: "bg-[#FFCB05]/25 text-[#7A6100]" },
+  { key: "orange_money", icon: Smartphone, tone: "bg-orange/15 text-[#B25E0B]" },
 ];
+const TRACK_STEPS = ["accepted", "arriving", "in_progress", "completed"] as const;
 
-const STATUS_STEPS = ["accepted", "arriving", "in_progress", "completed"] as const;
-
-function BookingFlowInner() {
+export default function BookingPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
+  const { session, user, profile, isAnonymous, signInAnonymous, loading: authLoading } = useAuth();
 
-  const [dropoff, setDropoff] = useState<{ lat: number; lng: number; label: string } | null>(null);
-  const [vehicle, setVehicle] = useState<VehicleType>("moto");
-  const [estimate, setEstimate] = useState<Estimate | null>(null);
+  const [ready, setReady] = useState(false);
+  const [pickup, setPickup] = useState<LatLngLabel>({ ...BERTOUA, label: "Bertoua Centre" });
+  const [dropoff, setDropoff] = useState<LatLngLabel | null>(null);
+  const [vehicle, setVehicle] = useState<RiderVehicle>("moto");
+  const [estimates, setEstimates] = useState<Partial<Record<RiderVehicle, Estimate>>>({});
   const [estimating, setEstimating] = useState(false);
-  const [step, setStep] = useState<Step>("choose");
+  const [payment, setPayment] = useState<PaymentMethod>("cash");
+  const [notes, setNotes] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const [provider, setProvider] = useState<DirectoryProvider | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [stars, setStars] = useState(0);
   const [comment, setComment] = useState("");
-  const [ratingDone, setRatingDone] = useState(false);
+  const [rated, setRated] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [needsSignIn, setNeedsSignIn] = useState(false);
+  const [route, setRoute] = useState<[number, number][] | null>(null);
 
-  const { booking } = useBooking(bookingId);
-
-  // read destination from query string
+  // Read params once: either resume (?id=) or a new trip (?lat&lng&label&plat&plng&plabel&vehicle).
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
+    const id = q.get("id");
+    if (id) setBookingId(id);
     const lat = parseFloat(q.get("lat") ?? "");
     const lng = parseFloat(q.get("lng") ?? "");
-    const label = q.get("label") ?? "Destination";
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      setDropoff({ lat, lng, label });
-    }
-  }, []);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) setDropoff({ lat, lng, label: q.get("label") || t("booking.destination") });
+    const plat = parseFloat(q.get("plat") ?? "");
+    const plng = parseFloat(q.get("plng") ?? "");
+    if (Number.isFinite(plat) && Number.isFinite(plng)) setPickup({ lat: plat, lng: plng, label: q.get("plabel") || "Bertoua" });
+    const v = q.get("vehicle") as RiderVehicle | null;
+    if (v && RIDER_VEHICLES.includes(v)) setVehicle(v);
+    setReady(true);
+  }, [t]);
 
-  // fetch estimate when vehicle or dropoff changes
+  // Fare for every vehicle type so the rider can compare.
   useEffect(() => {
-    if (!dropoff) return;
+    if (!dropoff || bookingId) return;
+    let alive = true;
     setEstimating(true);
-    estimateFare(BERTOUA, dropoff, vehicle)
-      .then(setEstimate)
-      .catch(() => setEstimate(null))
-      .finally(() => setEstimating(false));
-  }, [vehicle, dropoff]);
+    Promise.all(RIDER_VEHICLES.map((v) => estimateFare(pickup, dropoff, v).then((e) => [v, e] as const).catch(() => null)))
+      .then((list) => {
+        if (!alive) return;
+        const next: Partial<Record<RiderVehicle, Estimate>> = {};
+        list.forEach((x) => x && (next[x[0]] = x[1]));
+        setEstimates(next);
+      })
+      .finally(() => alive && setEstimating(false));
+    return () => {
+      alive = false;
+    };
+  }, [pickup, dropoff, bookingId]);
 
-  // move to accepted step when booking accepted
-  useEffect(() => {
-    if (booking?.status === "accepted" && step === "looking") {
-      setStep("accepted");
-      if (booking.provider_id) {
-        getProvider(booking.provider_id).then(setProvider);
-      }
-    } else if (booking?.status === "completed" && (step === "accepted" || step === "looking")) {
-      setStep("completed");
-    }
-  }, [booking, step]);
+  const { booking } = useBooking(bookingId);
+  const estimate = estimates[vehicle];
 
   const confirm = useCallback(async () => {
     if (!dropoff) return;
     setCreating(true);
+    setCreateError(null);
     try {
+      let passengerId = user?.id;
+      if (!session) {
+        // Anonymous booking is allowed: create a guest session on the fly.
+        const res = await signInAnonymous();
+        passengerId = res.userId;
+      }
       const b = await createBooking({
-        passenger_id: "passenger-1",
+        passenger_id: passengerId ?? "anon",
+        passenger_name: profile?.full_name ?? null,
+        passenger_phone: profile?.phone ?? (guestPhone.trim() ? guestPhone.trim() : null),
         vehicle_type: vehicle,
-        pickup: { ...BERTOUA, label: "Bertoua Centre" },
+        pickup,
         dropoff,
+        payment_method: payment,
+        notes: notes.trim() || undefined,
       });
       setBookingId(b.id);
-      setStep("looking");
+      router.replace(`/${locale}/booking?id=${b.id}`);
+    } catch (e) {
+      setCreateError(e instanceof Error && e.message === "queued" ? t("booking.queued") : t("common.networkError"));
     } finally {
       setCreating(false);
     }
-  }, [dropoff, vehicle]);
+  }, [dropoff, user, session, signInAnonymous, profile, guestPhone, vehicle, pickup, payment, notes, router, locale, t]);
 
-  const cancel = useCallback(async () => {
-    if (bookingId) await setBookingStatus(bookingId, "cancelled");
+  const cancel = async () => {
+    if (!bookingId) return;
+    setCancelling(true);
+    await setBookingStatus(bookingId, "cancelled");
+    setCancelling(false);
+  };
+
+  const rebook = () => {
+    if (!booking) return;
+    const q = new URLSearchParams({
+      lat: String(booking.dropoff.lat),
+      lng: String(booking.dropoff.lng),
+      label: booking.dropoff.label,
+      plat: String(booking.pickup.lat),
+      plng: String(booking.pickup.lng),
+      plabel: booking.pickup.label,
+      vehicle: booking.vehicle_type,
+    });
     setBookingId(null);
-    setStep("choose");
-  }, [bookingId]);
+    setDropoff(booking.dropoff);
+    setPickup(booking.pickup);
+    router.replace(`/${locale}/booking?${q.toString()}`);
+  };
 
-  const submitRating = useCallback(async () => {
-    if (!bookingId || stars === 0) return;
-    await rateBooking(bookingId, stars, comment);
-    setRatingDone(true);
-  }, [bookingId, stars, comment]);
+  const submitRating = async () => {
+    if (!bookingId || !stars) return;
+    try {
+      const ok = await rateBooking(bookingId, stars, comment);
+      if (ok) setRated(true);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) setNeedsSignIn(true);
+    }
+  };
 
-  if (!dropoff) {
+  // Live rider position (polled with the booking) and the route they are driving.
+  const riderLoc = booking?.provider && ["accepted", "arriving", "in_progress"].includes(booking.status) ? booking.provider.last_location : null;
+  const markers = useMemo(() => {
+    const p = booking?.provider;
+    if (!p || !riderLoc) return [];
+    return [{ id: p.id, lat: riderLoc.lat, lng: riderLoc.lng, color: "#123D32", label: p.display_name, size: "md" as const, kind: "vehicle" as const, vehicle: booking?.vehicle_type }];
+  }, [booking?.provider, booking?.vehicle_type, riderLoc]);
+
+  const legFrom = booking?.status === "in_progress" ? booking.pickup : riderLoc ?? booking?.pickup ?? pickup;
+  const legTo = booking && booking.status !== "in_progress" && riderLoc ? booking.pickup : booking?.dropoff ?? dropoff;
+  const legKey = legFrom && legTo ? `${legFrom.lat.toFixed(4)},${legFrom.lng.toFixed(4)},${legTo.lat.toFixed(4)},${legTo.lng.toFixed(4)}` : "";
+  useEffect(() => {
+    if (!legFrom || !legTo) return;
+    let alive = true;
+    getRoute(legFrom, legTo).then((r) => alive && setRoute(r.coordinates));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [legKey]);
+
+  if (!ready || authLoading || (bookingId && !booking)) return <PageLoader label={t("common.loading")} />;
+
+  const back = (
+    <Link
+      href={`/${locale}${bookingId ? "/trips" : ""}`}
+      className="absolute left-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-white text-charcoal shadow-lg"
+      aria-label={t("common.back")}
+    >
+      <ArrowLeft className="w-5 h-5" />
+    </Link>
+  );
+
+  if (!bookingId && !dropoff) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-4">
-            <Star className="w-8 h-8 text-green opacity-0" />
-            <span className="absolute text-green text-2xl">📍</span>
-          </div>
-          <p className="text-charcoal/60 mt-2 text-lg">{t("booking.pickFirst")}</p>
-          <button onClick={() => router.back()} className="mt-4 text-green font-medium hover:underline transition-colors">
-            ← {t("nav.home")}
-          </button>
-        </div>
+      <div className="min-h-dvh flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-lg font-bold">{t("booking.pickFirst")}</p>
+        <Button href={`/${locale}`}>{t("map.whereTo")}</Button>
       </div>
     );
   }
 
-  if (step === "choose") {
-    return (
-      <div className="min-h-screen bg-ivory p-4 sm:p-6">
-        <div className="max-w-sm mx-auto space-y-4">
-          <div className="bg-white rounded-2xl shadow-card p-5">
-            <div className="flex items-start gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-green mt-2 shrink-0" />
-              <div>
-                <div className="text-xs text-charcoal/50 uppercase">Départ</div>
-                <div className="text-sm font-medium text-charcoal">Bertoua Centre</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-2 h-2 rounded-full bg-orange mt-2 shrink-0" />
-              <div>
-                <div className="text-xs text-charcoal/50 uppercase">Arrivée</div>
-                <div className="text-sm font-medium text-charcoal">{dropoff.label}</div>
-              </div>
-            </div>
-          </div>
+  const pickupPoint = booking?.pickup ?? pickup;
+  const mapCenter: [number, number] = [(booking?.dropoff ?? dropoff!).lng, (booking?.dropoff ?? dropoff!).lat];
 
-          <div className="bg-white rounded-2xl shadow-card p-5">
-            <h2 className="text-sm font-semibold text-charcoal/70 uppercase tracking-wider mb-3">
-              {t("booking.chooseVehicle")}
-            </h2>
-            <div className="grid grid-cols-2 gap-2">
-              {VEHICLES.map(({ type, Icon }) => (
-                <button
-                  key={type}
-                  onClick={() => setVehicle(type)}
-                  className={`flex items-center gap-2 rounded-xl border p-3 text-left transition-all duration-200 ${
-                    vehicle === type ? "border-green bg-green/5" : "border-grey"
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 ${vehicle === type ? "text-green" : "text-charcoal/50"}`} />
-                  <span className="text-sm font-medium text-charcoal">{t(`home.service.${type === "taxi" ? "ride" : type === "truck" ? "cargo" : type}`)}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-4 border-t border-grey pt-4">
-              {estimating ? (
-                <div className="flex items-center gap-2 text-charcoal/50">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">{t("booking.estimating")}</span>
-                </div>
-              ) : estimate ? (
-                <div className="flex items-end justify-between">
-                  <div>
-                    <div className="text-2xl font-bold text-green">{estimate.fare_estimate_xaf.toLocaleString()} XAF</div>
-                    <div className="text-xs text-charcoal/50 mt-1">
-                      {(estimate.distance_m / 1000).toFixed(1)} km · ~{estimate.eta_min} min
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-charcoal/50 uppercase">{t("booking.payment")}</div>
-                    <div className="text-sm font-medium text-charcoal">{t("booking.cash")}</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-sm text-orange">{t("booking.noEstimate")}</div>
-              )}
-            </div>
-          </div>
-
-          <button
-            onClick={confirm}
-            disabled={creating || !estimate}
-            className="w-full bg-orange text-white rounded-xl py-3 font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange/25 hover:shadow-orange/40 transition-all active:scale-95"
-          >
-            {creating && <Loader2 className="w-4 h-4 animate-spin" />}
-            {t("booking.confirm")}
-          </button>
-        </div>
+  return (
+    <div className="min-h-dvh bg-ivory lg:grid lg:grid-cols-[1fr_440px]">
+      <div className="relative h-[38dvh] lg:h-dvh lg:sticky lg:top-0">
+        <MapContainer
+          center={mapCenter}
+          zoom={13}
+          markers={markers}
+          pickup={{ lat: pickupPoint.lat, lng: pickupPoint.lng }}
+          dropoff={booking?.dropoff ?? dropoff}
+          route={route}
+          fitKey={`${booking?.status ?? "new"}-${legKey}`}
+          fitPoints={[pickupPoint, booking?.dropoff ?? dropoff, riderLoc].filter(Boolean) as { lat: number; lng: number }[]}
+        />
+        {back}
       </div>
-    );
-  }
 
-  if (step === "looking") {
-    return (
-      <div className="min-h-screen bg-ivory flex flex-col items-center justify-center p-4 sm:p-6">
-        <div className="relative w-24 h-24 mb-6">
-          <div className="absolute inset-0 rounded-full bg-green/10 animate-ping" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-green animate-spin" />
-          </div>
-        </div>
-        <h2 className="text-xl font-bold text-charcoal mb-2">{t("booking.looking")}</h2>
-        <p className="text-sm text-charcoal/50 mb-8 text-center">{t("booking.lookingHint")}</p>
-        <button
-          onClick={cancel}
-          className="border border-grey rounded-xl px-6 py-2 text-sm font-medium text-charcoal hover:bg-grey/50 transition-colors active:scale-95"
-        >
-          {t("booking.cancel")}
-        </button>
-      </div>
-    );
-  }
+      <div className="relative -mt-6 lg:mt-0 rounded-t-[1.75rem] lg:rounded-none bg-white p-5 pb-10 shadow-[0_-12px_40px_rgba(18,61,50,0.12)] lg:shadow-none lg:border-l lg:border-grey min-h-[62dvh] lg:min-h-dvh">
+        {/* --------------------------------------------------- review */}
+        {!booking && dropoff && (
+          <div className="space-y-5 animate-fade-in">
+            <h1 className="text-xl font-extrabold">{t("booking.reviewTitle")}</h1>
+            <Card className="p-4">
+              <RouteLine from={pickup.label} to={dropoff.label} fromLabel={t("booking.pickup")} toLabel={t("booking.dropoff")} />
+            </Card>
 
-  if (step === "accepted" && booking) {
-    const currentIdx = STATUS_STEPS.indexOf(booking.status as any);
-    const markers = [
-      { id: "pickup", lat: booking.pickup.lat, lng: booking.pickup.lng, color: "#087C55", label: booking.pickup.label, size: "md" as const },
-      { id: "dropoff", lat: booking.dropoff.lat, lng: booking.dropoff.lng, color: "#F28C28", label: booking.dropoff.label, size: "md" as const },
-      ...(provider ? [{ id: provider.id, lat: provider.last_location.lat, lng: provider.last_location.lng, color: "#2563eb", label: provider.display_name, size: "md" as const }] : []),
-    ];
-    return (
-      <div className="min-h-screen bg-ivory flex flex-col">
-        <div className="h-[40vh] sm:h-[35vh] relative bg-white overflow-hidden">
-          <MapContainer
-            center={[booking.dropoff.lng, booking.dropoff.lat]}
-            zoom={13}
-            markers={markers}
-            pickup={{ lat: booking.pickup.lat, lng: booking.pickup.lng }}
-          />
-        </div>
-        <div className="flex-1 bg-white rounded-t-3xl -mt-4 p-5 shadow-lg space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-full bg-grey overflow-hidden shrink-0">
-              {provider?.photo ? (
-                <img src={provider.photo} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-charcoal/40">?</div>
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="text-base font-bold text-charcoal">{provider?.display_name ?? "Prestataire"}</div>
-              <div className="text-xs text-charcoal/50">
-                {provider ? `${provider.vehicle.brand} ${provider.vehicle.model} · ${provider.vehicle.plate}` : ""}
-              </div>
-              {provider && (
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Star className="w-3 h-3 text-orange fill-orange" />
-                  <span className="text-xs font-medium text-charcoal">{provider.rating_avg}</span>
-                  <span className="text-xs text-charcoal/40">({provider.rating_count})</span>
-                </div>
-              )}
-            </div>
-            <a href="tel:+237690000000" className="w-10 h-10 rounded-full bg-green/10 flex items-center justify-center">
-              <Phone className="w-5 h-5 text-green" />
-            </a>
-          </div>
-
-          <div className="flex items-center justify-between">
-            {STATUS_STEPS.map((s, i) => (
-              <div key={s} className="flex-1 flex flex-col items-center">
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                    i <= currentIdx ? "bg-green text-white" : "bg-grey text-charcoal/40"
-                  }`}
-                >
-                  {i < currentIdx ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
-                </div>
-                <div className={`text-[10px] mt-1 text-center ${i <= currentIdx ? "text-green font-medium" : "text-charcoal/40"}`}>
-                  {t(`booking.status.${s}`)}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-end justify-between">
             <div>
-              <div className="text-xs text-charcoal/50 uppercase">{t("booking.fare")}</div>
-              <div className="text-xl font-bold text-green">{booking.fare_estimate_xaf.toLocaleString()} XAF</div>
+              <p className="mb-2 text-sm font-bold">{t("booking.chooseVehicle")}</p>
+              <div className="space-y-2" role="radiogroup">
+                {RIDER_VEHICLES.map((v) => {
+                  const e = estimates[v];
+                  const active = vehicle === v;
+                  return (
+                    <button
+                      key={v}
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setVehicle(v)}
+                      className={cx(
+                        "flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition",
+                        active ? "border-green bg-green/5" : "border-grey bg-white hover:border-green/40",
+                      )}
+                    >
+                      <span className={cx("flex h-12 w-12 items-center justify-center rounded-xl", active ? "bg-green text-white" : "bg-ivory text-charcoal/70")}>
+                        <ServiceIcon service={v} className="w-6 h-6" />
+                      </span>
+                      <span className="flex-1">
+                        <span className="block font-bold">{t(`vehicleTypes.${v}`)}</span>
+                        <span className="block text-xs text-charcoal/55">{t(`booking.vehicleHint.${v}`)}</span>
+                      </span>
+                      <span className="text-right">
+                        <span className="block font-extrabold">{e ? formatXAF(e.fare_estimate_xaf, locale) : estimating ? "…" : "—"}</span>
+                        {e && <span className="block text-xs text-charcoal/50">~{e.eta_min} min</span>}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <button onClick={cancel} className="flex items-center gap-1 text-orange text-sm font-medium hover:text-orange-dark transition-colors">
-              <X className="w-4 h-4" />
-              {t("booking.cancel")}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
-  if (step === "completed" && booking) {
-    return (
-      <div className="min-h-screen bg-ivory flex flex-col items-center justify-center p-4 sm:p-6">
-        <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center mb-4">
-          <CheckCircle2 className="w-10 h-10 text-green" />
-        </div>
-        <h2 className="text-xl font-bold text-charcoal mb-1">{t("booking.completed")}</h2>
-        <div className="text-3xl font-bold text-green mt-4">{(booking.fare_final_xaf ?? booking.fare_estimate_xaf).toLocaleString()} XAF</div>
-        <p className="text-xs text-charcoal/50 mt-1">{t("booking.cashCollected")}</p>
-
-        {!ratingDone ? (
-          <div className="w-full max-w-sm mt-8 bg-white rounded-2xl shadow-card p-5">
-            <div className="text-sm font-semibold text-charcoal/70 mb-3 text-center">{t("booking.rate")}</div>
-            <div className="flex justify-center gap-1 mb-4">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} onClick={() => setStars(n)}>
-                  <Star className={`w-8 h-8 ${n <= stars ? "text-orange fill-orange" : "text-grey"}`} />
-                </button>
-              ))}
+            <div>
+              <p className="mb-2 text-sm font-bold">{t("booking.payment")}</p>
+              <div className="grid grid-cols-3 gap-2" role="radiogroup">
+                {PAYMENTS.map(({ key, icon: Icon, tone }) => (
+                  <button
+                    key={key}
+                    role="radio"
+                    aria-checked={payment === key}
+                    onClick={() => setPayment(key)}
+                    className={cx(
+                      "relative flex flex-col items-center gap-1.5 rounded-2xl border-2 p-3 text-xs font-bold transition",
+                      payment === key ? "border-green bg-green/5" : "border-grey bg-white hover:border-green/40",
+                    )}
+                  >
+                    {payment === key && <CircleCheck className="absolute right-1.5 top-1.5 w-4 h-4 text-green" />}
+                    <span className={cx("flex h-9 w-9 items-center justify-center rounded-full", tone)}>
+                      <Icon className="w-5 h-5" />
+                    </span>
+                    {t(`payments.${key}`)}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-charcoal/50">{t(`booking.paymentHint.${payment}`)}</p>
             </div>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder={t("booking.comment")}
-              className="w-full border border-grey rounded-xl p-3 text-sm focus:outline-none focus:border-green focus:ring-2 focus:ring-green/20"
-              rows={2}
-            />
-            <button
-              onClick={submitRating}
-              disabled={stars === 0}
-              className="w-full mt-3 bg-green text-white rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50 hover:shadow-glow transition-all"
-            >
-              {t("booking.submitRating")}
-            </button>
+
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value.slice(0, 200))} placeholder={t("booking.notesPlaceholder")} className="min-h-[64px]" />
+
+            {(!profile || isAnonymous) && (
+              <div>
+                <p className="mb-1 text-sm font-bold">{t("booking.guestPhone")}</p>
+                <Input type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} placeholder="+237 6…" />
+                <p className="mt-1 text-xs text-charcoal/50">{t("booking.guestPhoneHint")}</p>
+              </div>
+            )}
+
+            {estimate && (
+              <div className="flex items-center justify-between rounded-2xl bg-ivory p-4">
+                <div>
+                  <p className="text-xs text-charcoal/55">{t("booking.total")}</p>
+                  <p className="text-xs text-charcoal/45">{formatKm(estimate.distance_m, locale)}</p>
+                </div>
+                <p className="text-2xl font-extrabold text-green">{formatXAF(estimate.fare_estimate_xaf, locale)}</p>
+              </div>
+            )}
+            {createError && <Alert tone="orange">{createError}</Alert>}
+            <Button block size="lg" variant="accent" onClick={confirm} loading={creating} disabled={!estimate}>
+              {t("booking.confirm", { vehicle: t(`vehicleTypes.${vehicle}`) })}
+            </Button>
           </div>
-        ) : (
-          <p className="text-sm text-green mt-6">{t("booking.thanks")}</p>
+        )}
+
+        {/* --------------------------------------------------- searching */}
+        {booking?.status === "requested" && (
+          <div className="flex flex-col items-center py-8 text-center animate-fade-in">
+            <div className="relative h-28 w-28">
+              <span className="absolute inset-0 rounded-full bg-green/15 animate-ping" />
+              <span className="absolute inset-3 rounded-full bg-green/20 animate-ping [animation-delay:300ms]" />
+              <span className="absolute inset-6 flex items-center justify-center rounded-full bg-green text-white shadow-lg">
+                <ServiceIcon service={booking.vehicle_type} className="w-7 h-7" />
+              </span>
+            </div>
+            <h1 className="mt-6 text-xl font-extrabold">{t("booking.looking")}</h1>
+            <p className="mt-1 max-w-xs text-sm text-charcoal/55">{t("booking.lookingHint")}</p>
+            <Card className="mt-6 w-full p-4 text-left">
+              <RouteLine from={booking.pickup.label} to={booking.dropoff.label} fromLabel={t("booking.pickup")} toLabel={t("booking.dropoff")} />
+              <div className="mt-3 flex justify-between border-t border-grey pt-3 text-sm">
+                <span className="text-charcoal/55">{t(`payments.${booking.payment_method}`)}</span>
+                <span className="font-extrabold">{formatXAF(booking.fare_estimate_xaf, locale)}</span>
+              </div>
+            </Card>
+            <Button variant="outline" className="mt-5" onClick={cancel} loading={cancelling}>
+              <X className="w-4 h-4" /> {t("booking.cancel")}
+            </Button>
+          </div>
+        )}
+
+        {/* --------------------------------------------------- tracking */}
+        {booking && ["accepted", "arriving", "in_progress"].includes(booking.status) && (
+          <div className="space-y-5 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-extrabold">{t(`booking.statusTitle.${booking.status}`)}</h1>
+              <Badge tone={STATUS_TONE[booking.status]}>{t(`booking.status.${booking.status}`)}</Badge>
+            </div>
+            <Stepper current={booking.status} />
+            {booking.provider && (
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <Avatar name={booking.provider.display_name} src={booking.provider.photo} size={56} />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-extrabold truncate">{booking.provider.display_name}</p>
+                    {booking.provider.vehicle && (
+                      <p className="text-sm text-charcoal/60 truncate">
+                        {booking.provider.vehicle.brand} {booking.provider.vehicle.model} · {booking.provider.vehicle.color}
+                      </p>
+                    )}
+                    <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold text-orange">
+                      <Star className="w-3.5 h-3.5 fill-orange" /> {booking.provider.rating_avg.toFixed(1)}
+                      <span className="font-normal text-charcoal/45">({booking.provider.rating_count})</span>
+                    </p>
+                  </div>
+                  {booking.provider.vehicle && (
+                    <span className="rounded-lg border-2 border-charcoal bg-[#FFE36E] px-2 py-1 font-mono text-xs font-extrabold tracking-wider">{booking.provider.vehicle.plate}</span>
+                  )}
+                </div>
+                {booking.provider_phone && (
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <Button href={`tel:${booking.provider_phone}`} variant="soft">
+                      <Phone className="w-4 h-4" /> {t("common.call")}
+                    </Button>
+                    <Button href={whatsappLink(booking.provider_phone)} variant="soft">
+                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )}
+            <Card className="p-4">
+              <RouteLine from={booking.pickup.label} to={booking.dropoff.label} fromLabel={t("booking.pickup")} toLabel={t("booking.dropoff")} />
+              <div className="mt-3 flex justify-between border-t border-grey pt-3 text-sm">
+                <span className="text-charcoal/55">{t(`payments.${booking.payment_method}`)}</span>
+                <span className="font-extrabold text-green">{formatXAF(booking.fare_estimate_xaf, locale)}</span>
+              </div>
+            </Card>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  t("booking.shareText", {
+                    from: booking.pickup.label,
+                    to: booking.dropoff.label,
+                    name: booking.provider?.display_name ?? "",
+                    plate: booking.provider?.vehicle?.plate ?? "",
+                  }),
+                )}`}
+              >
+                <Share2 className="w-4 h-4" /> {t("booking.shareTrip")}
+              </Button>
+              {booking.status !== "in_progress" ? (
+                <Button variant="danger" onClick={cancel} loading={cancelling}>
+                  {t("booking.cancel")}
+                </Button>
+              ) : (
+                <Button variant="outline" href="tel:117">
+                  SOS 117
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* --------------------------------------------------- completed */}
+        {booking?.status === "completed" && (
+          <div className="flex flex-col items-center text-center py-4 animate-fade-in">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-green text-white shadow-lg shadow-green/30">
+              <CircleCheck className="w-9 h-9" />
+            </span>
+            <h1 className="mt-4 text-2xl font-extrabold">{t("booking.completed")}</h1>
+            <p className="mt-1 text-sm text-charcoal/55">{t(`booking.paidWith.${booking.payment_method}`)}</p>
+            <p className="mt-3 text-4xl font-extrabold text-green">{formatXAF(booking.fare_final_xaf ?? booking.fare_estimate_xaf, locale)}</p>
+            {!rated && !booking.rating && (isAnonymous || !profile || needsSignIn) ? (
+              <Card className="mt-6 w-full p-5">
+                <p className="font-bold">{t("booking.rate", { name: booking.provider?.display_name ?? "" })}</p>
+                <div className="my-3 flex justify-center gap-1 opacity-40" aria-hidden>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star key={n} className="w-8 h-8 text-grey" />
+                  ))}
+                </div>
+                <p className="text-sm text-charcoal/60">{t("booking.signInToRate")}</p>
+                <Button href={`/${locale}/auth?next=${encodeURIComponent(`/${locale}/booking?id=${booking.id}`)}`} block className="mt-3">
+                  {t("booking.signInToRateCta")}
+                </Button>
+              </Card>
+            ) : !rated && !booking.rating ? (
+              <Card className="mt-6 w-full p-5">
+                <p className="font-bold">{t("booking.rate", { name: booking.provider?.display_name ?? "" })}</p>
+                <div className="my-3 flex justify-center gap-1" role="radiogroup" aria-label={t("booking.rate", { name: "" })}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button key={n} onClick={() => setStars(n)} aria-label={`${n}/5`} role="radio" aria-checked={stars === n} className="p-1">
+                      <Star className={cx("w-9 h-9 transition", n <= stars ? "fill-orange text-orange scale-110" : "text-grey")} />
+                    </button>
+                  ))}
+                </div>
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("booking.comment")} className="min-h-[64px]" />
+                <Button block className="mt-3" onClick={submitRating} disabled={!stars}>
+                  {t("booking.submitRating")}
+                </Button>
+              </Card>
+            ) : (
+              <Alert tone="green">{t("booking.thanks")}</Alert>
+            )}
+            <div className="mt-6 grid w-full grid-cols-2 gap-2">
+              <Button variant="outline" onClick={rebook}>
+                {t("booking.bookAgain")}
+              </Button>
+              <Button href={`/${locale}/dashboard`}>{t("nav.home")}</Button>
+            </div>
+          </div>
+        )}
+
+        {/* --------------------------------------------------- cancelled / expired */}
+        {booking && (booking.status === "cancelled" || booking.status === "expired") && (
+          <div className="flex flex-col items-center py-10 text-center animate-fade-in">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-charcoal/5 text-charcoal/50">
+              <X className="w-8 h-8" />
+            </span>
+            <h1 className="mt-4 text-xl font-extrabold">{t(`booking.${booking.status}Title`)}</h1>
+            <p className="mt-1 max-w-xs text-sm text-charcoal/55">{t(`booking.${booking.status}Hint`)}</p>
+            <div className="mt-6 flex gap-2">
+              <Button variant="accent" onClick={rebook}>
+                {t("booking.tryAgain")}
+              </Button>
+              <Button variant="outline" href={`/${locale}/directory`}>
+                {t("nav.directory")}
+              </Button>
+            </div>
+          </div>
         )}
       </div>
-    );
-  }
-
-  return null;
-}
-
-function MapPinPlaceholder() {
-  return (
-    <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center mx-auto">
-      <Star className="w-8 h-8 text-green opacity-0" />
-      <span className="absolute text-green text-2xl">📍</span>
     </div>
   );
 }
 
-export default function BookingPage() {
+function Stepper({ current }: { current: string }) {
+  const t = useTranslations();
+  const idx = TRACK_STEPS.indexOf(current as (typeof TRACK_STEPS)[number]);
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-4"><Loader2 className="w-6 h-6 text-green animate-spin" /></div>}>
-      <BookingFlowInner />
-    </Suspense>
+    <ol className="flex items-center gap-1.5">
+      {TRACK_STEPS.map((s, i) => (
+        <li key={s} className="flex flex-1 flex-col gap-1.5">
+          <span className={cx("h-1.5 rounded-full transition-colors", i <= idx ? "bg-green" : "bg-grey")} />
+          <span className={cx("text-[11px] font-semibold", i <= idx ? "text-green" : "text-charcoal/40")}>{t(`booking.status.${s}`)}</span>
+        </li>
+      ))}
+    </ol>
   );
 }

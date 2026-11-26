@@ -3,3 +3,7 @@ node_modules/
 .env.local
 *.log
 
+
+# Mock backend data (apps/web/.mock-data)
+.mock-data/
+.next-preview/

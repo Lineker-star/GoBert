@@ -1,12 +1,7 @@
-"use client";
-import { useTranslations } from "next-intl";
+import { redirect } from "next/navigation";
 
-export default function EarningsPage() {
-  const t = useTranslations("provider");
-  return (
-    <main className="min-h-screen p-6">
-      <h1 className="text-2xl font-bold text-[#087C55] mb-4">{t("earnings")}</h1>
-      <p>{t("today")}: 0 XAF</p>
-    </main>
-  );
+/** Legacy route kept so old links and PWA shortcuts still work. */
+export default async function LegacyRedirect({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  redirect(`/${locale}/trips`);
 }

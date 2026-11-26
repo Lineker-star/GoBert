@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProviders, estimateFare, getAISettings, logAIUsage } from "@/lib/mock-store";
+import { getPublicProviders, estimateFare, getAISettings, logAIUsage } from "@/lib/mock-store";
 import { supabase } from "@/lib/supabase";
 import { embed, embedToVectorLiteral } from "@/lib/embedding";
 
@@ -47,12 +47,12 @@ export async function POST(req: NextRequest) {
   let answer: string;
 
   if (wantsTaxi) {
-    const all = getProviders().filter((p) => p.is_online);
+    const all = getPublicProviders({ onlineOnly: true, kind: "rider" });
     const taxis = all.filter((p) => p.service === "ride" || p.service === "moto");
     const near = taxis
       .map((p) => {
         const d = Math.hypot(p.last_location.lat - 4.5774, p.last_location.lng - 13.6846);
-        return { name: p.display_name, rating: p.rating_avg, plate: p.vehicle.plate, dist: d };
+        return { name: p.display_name, rating: p.rating_avg, plate: p.vehicle?.plate ?? "", dist: d };
       })
       .sort((a, b) => a.dist - b.dist)
       .slice(0, 3);

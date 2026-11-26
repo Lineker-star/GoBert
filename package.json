@@ -7,7 +7,8 @@
     "build": "pnpm --recursive build",
     "lint": "pnpm --recursive lint",
     "typecheck": "pnpm --recursive typecheck",
-    "test": "pnpm --recursive test"
+    "test": "pnpm --recursive test",
+    "prepare": "husky"
   },
   "workspaces": [
     "apps/*",
@@ -20,7 +21,14 @@
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "postcss": "^8.5.33",
+    "prettier": "^3.10.1",
     "tailwindcss": "^4.3.5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "next": "^15.5.29"

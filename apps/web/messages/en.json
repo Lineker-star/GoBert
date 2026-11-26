@@ -1,146 +1,812 @@
 {
-  "home": {
-    "title": "GoBert",
-    "tagline": "Move. Connect. Go.",
-    "whereTo": "Where to?",
-    "service": { "moto": "Moto", "ride": "Ride", "express": "Express", "cargo": "Cargo", "rent": "Rent" },
-    "shortcut": { "home": "Home", "work": "Work", "market": "Market", "hospital": "Hospital", "carrefour": "Carrefour" }
+  "common": {
+    "loading": "Loading…",
+    "back": "Back",
+    "backHome": "Back to home",
+    "next": "Next",
+    "save": "Save",
+    "saved": "Saved ✓",
+    "edit": "Edit",
+    "remove": "Remove",
+    "close": "Close",
+    "optional": "optional",
+    "seeAll": "See all",
+    "call": "Call",
+    "perDay": "/ day",
+    "perHour": "/ hour",
+    "error": "Something went wrong. Please try again.",
+    "networkError": "Connection problem. Check your network and try again."
+  },
+  "nav": {
+    "home": "Home",
+    "book": "Book",
+    "trips": "Trips",
+    "assistant": "Assistant",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "directory": "Directory",
+    "rent": "Rent",
+    "express": "Express",
+    "signIn": "Sign in",
+    "ride": "Ride",
+    "services": "Services",
+    "partners": "Partners"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet.",
+    "kind": {
+      "provider_submitted": "Your application “{name}” was sent. An admin will review it shortly.",
+      "provider_approved": "🎉 Your account is approved! Customers can now see and book your services.",
+      "provider_rejected": "Your application was rejected. Reason: {reason}",
+      "provider_changes_requested": "An admin asked for changes: {reason}",
+      "provider_suspended": "Your account is suspended. Reason: {reason}",
+      "booking_accepted": "{provider} accepted your trip and is on the way.",
+      "rental_requested": "New rental request from {customer} for {vehicle}.",
+      "rental_confirmed": "Your rental of {vehicle} is confirmed.",
+      "rental_declined": "Your rental request for {vehicle} was declined.",
+      "parcel_accepted": "{provider} will deliver your parcel.",
+      "parcel_delivered": "Your parcel was delivered to {receiver}."
+    }
+  },
+  "roles": {
+    "customer": {
+      "label": "Customer",
+      "short": "Book rides, deliveries and rentals",
+      "title": "Get where you need to go",
+      "desc": "Book a moto, taxi, tricycle or truck in seconds, send parcels and rent vehicles from verified local providers.",
+      "point1": "Transparent prices in FCFA before you book",
+      "point2": "Pay cash, MTN MoMo or Orange Money",
+      "point3": "Book as a guest — no account required",
+      "cta": "Start riding"
+    },
+    "rider": {
+      "label": "Rider",
+      "short": "I own or drive a moto, taxi, tricycle or truck",
+      "title": "Drive with GoBert, earn more",
+      "desc": "Owners and drivers of motorbikes, taxis, tricycles and trucks get trip requests from nearby customers.",
+      "point1": "Go online when you want — you choose your hours",
+      "point2": "Keep your customers: they can call you directly",
+      "point3": "Verified badge that builds trust",
+      "cta": "Become a rider"
+    },
+    "business": {
+      "label": "Service provider",
+      "short": "Delivery, car rental, logistics or transport company",
+      "title": "Grow your transport business",
+      "desc": "Delivery services, car and truck rental agencies and logistics companies reach customers across the East region.",
+      "point1": "List your fleet for rent by the hour or day",
+      "point2": "Receive delivery and cargo jobs",
+      "point3": "Manage requests from one dashboard",
+      "cta": "Register my business"
+    }
+  },
+  "services": {
+    "moto": {
+      "name": "Moto",
+      "desc": "Fast motorbike taxis across town"
+    },
+    "ride": {
+      "name": "Ride",
+      "desc": "Taxis and private cars"
+    },
+    "express": {
+      "name": "Express",
+      "desc": "Parcels delivered within the hour"
+    },
+    "cargo": {
+      "name": "Cargo",
+      "desc": "Goods transport by truck or tricycle"
+    },
+    "rent": {
+      "name": "Rent",
+      "desc": "Cars, vans and trucks by the hour or day"
+    },
+    "logistics": {
+      "name": "Logistics",
+      "desc": "Moving, freight and supply runs"
+    }
+  },
+  "vehicleTypes": {
+    "moto": "Moto",
+    "taxi": "Taxi / car",
+    "tricycle": "Tricycle",
+    "truck": "Truck"
+  },
+  "rentalTypes": {
+    "car": "Car",
+    "van": "Van / minibus",
+    "truck": "Truck",
+    "moto": "Motorbike",
+    "tricycle": "Tricycle"
+  },
+  "businessTypes": {
+    "delivery": {
+      "name": "Delivery",
+      "desc": "Parcels, food, documents"
+    },
+    "car_rental": {
+      "name": "Vehicle rental",
+      "desc": "Cars, vans, trucks"
+    },
+    "logistics": {
+      "name": "Logistics",
+      "desc": "Freight, moving, cargo"
+    },
+    "other": {
+      "name": "Other transport",
+      "desc": "Buses, agencies, others"
+    }
+  },
+  "documents": {
+    "id_card": "National ID card (CNI)",
+    "license": "Driving licence",
+    "registration": "Vehicle registration (carte grise)",
+    "insurance": "Insurance certificate",
+    "rider_photo": "Your photo (selfie)",
+    "business_registration": "Business registration (RCCM)",
+    "manager_id": "Manager's ID card",
+    "tax_card": "Taxpayer card (NIU)"
+  },
+  "days": {
+    "0": "Sun",
+    "1": "Mon",
+    "2": "Tue",
+    "3": "Wed",
+    "4": "Thu",
+    "5": "Fri",
+    "6": "Sat"
+  },
+  "payments": {
+    "cash": "Cash",
+    "mtn_momo": "MTN MoMo",
+    "orange_money": "Orange Money"
+  },
+  "status": {
+    "requested": "Requested",
+    "accepted": "Accepted",
+    "arriving": "Arriving",
+    "in_progress": "In progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "expired": "Expired",
+    "confirmed": "Confirmed",
+    "declined": "Declined",
+    "active": "In use",
+    "in_transit": "In transit",
+    "delivered": "Delivered",
+    "pending": "Pending review",
+    "approved": "Verified",
+    "rejected": "Rejected",
+    "changes_requested": "Changes requested",
+    "suspended": "Suspended"
+  },
+  "parcelSizes": {
+    "small": {
+      "name": "Small",
+      "desc": "Envelope, phone"
+    },
+    "medium": {
+      "name": "Medium",
+      "desc": "Shoebox, bag"
+    },
+    "large": {
+      "name": "Large",
+      "desc": "Carton, sack"
+    }
+  },
+  "landing": {
+    "nav": {
+      "services": "Services",
+      "how": "How it works",
+      "partners": "Join us"
+    },
+    "badge": "Born in Bertoua · Built for Cameroon",
+    "heroSubtitle": "Motorbikes, taxis, tricycles, trucks, vehicle rental and express delivery — from verified local riders and businesses. Works even on a slow connection.",
+    "heroImageAlt": "GoBert taxi, moto and delivery rider in Bertoua",
+    "ctaBook": "Book a ride",
+    "ctaCreate": "Create an account",
+    "ctaJoin": "Get started",
+    "ctaGuest": "Just looking? Continue as a guest",
+    "ctaDrive": "Drive with GoBert",
+    "floatEta": "Your rider arrives in ~3 min",
+    "floatVerified": "100% verified providers",
+    "stats": {
+      "services": {
+        "value": "6",
+        "label": "services in one app"
+      },
+      "verified": {
+        "value": "100%",
+        "label": "admin-verified providers"
+      },
+      "languages": {
+        "value": "FR · EN",
+        "label": "fully bilingual"
+      }
+    },
+    "servicesEyebrow": "One app, every move",
+    "servicesTitle": "Everything that moves in Bertoua",
+    "servicesSubtitle": "From a quick moto ride to the market to a truck for your building site — choose a service and see the price before you book.",
+    "audienceEyebrow": "Three ways to use GoBert",
+    "audienceTitle": "Who are you?",
+    "audienceSubtitle": "Choose your profile when you sign up. Each one gets its own dashboard.",
+    "howEyebrow": "Trust & safety",
+    "howTitle": "Every rider and business is checked",
+    "howSubtitle": "Riders and service providers only appear to customers after a GoBert admin has verified their documents.",
+    "how": {
+      "step1": {
+        "title": "Register with your phone",
+        "desc": "Sign up in minutes with an SMS code. Choose customer, rider or service provider."
+      },
+      "step2": {
+        "title": "Send your documents",
+        "desc": "ID, licence, vehicle papers or business registration — photographed straight from your phone."
+      },
+      "step3": {
+        "title": "Get verified, go live",
+        "desc": "Once an admin approves you, your services become visible and bookable."
+      }
+    },
+    "posterAlt": "Bertoua moves with GoBert",
+    "values": {
+      "safe": {
+        "title": "Safe & reliable",
+        "desc": "Verified providers, shared trips, SOS."
+      },
+      "local": {
+        "title": "Local economy",
+        "desc": "Riders and businesses from Bertoua earn more."
+      },
+      "lowData": {
+        "title": "Built for 2G/3G",
+        "desc": "Light pages and offline mode."
+      },
+      "fast": {
+        "title": "Book in one tap",
+        "desc": "Clear prices, fast matching."
+      }
+    },
+    "finalTitle": "Bertoua moves with GoBert!",
+    "finalSubtitle": "Book your first trip now or join as a rider or service provider.",
+    "footer": {
+      "born": "Born in Bertoua. Built for Cameroon. Ready for Africa.",
+      "product": "Services",
+      "partners": "Partners",
+      "rights": "All rights reserved"
+    }
   },
   "auth": {
-    "title": "Sign in",
-    "subtitle": "Sign in with your phone number",
-    "phonePlaceholder": "Phone number",
+    "sideTitle": "Move. Connect. Go.",
+    "sideSubtitle": "One account for rides, deliveries and rentals in Bertoua and the East region.",
+    "chooseRole": "Join GoBert",
+    "chooseRoleHint": "How will you use GoBert? You can't change this later.",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "or": "or",
+    "continueAnonymous": "Continue as a guest",
+    "guestNote": "Guests can book trips. Create an account to keep your history.",
+    "loginTitle": "Welcome back",
+    "signupTitle": {
+      "customer": "Create your customer account",
+      "rider": "Become a GoBert rider",
+      "business": "Register your business"
+    },
+    "phoneSubtitle": "We'll send you a 6-digit code by SMS.",
+    "phoneLabel": "Phone number",
+    "phoneHint": "Cameroon: 9 digits starting with 6 (MTN, Orange, Camtel, Nexttel)",
+    "countryCode": "Country code",
     "sendOtp": "Send code",
-    "continueAnonymous": "Continue without account",
+    "sending": "Sending…",
+    "privacy": "Your number stays private and is never shown to other users without your consent.",
+    "verifyTitle": "Enter the code",
+    "codeSentTo": "Code sent to {phone}",
+    "demoOtp": "Demo mode: no SMS is sent — enter any 6 digits.",
     "otpPlaceholder": "6-digit code",
     "verify": "Verify",
+    "verifying": "Verifying…",
     "resend": "Resend code",
     "resendIn": "Resend in {seconds}s",
     "changeNumber": "Change number",
-    "verifying": "Verifying…",
-    "sending": "Sending…",
+    "profileTitle": "Complete your profile",
+    "profileSubtitle": "Just a few details and you're in.",
+    "accountType": "Account type",
+    "verificationNotice": "Riders and service providers are verified by an admin before their services are visible to customers. You'll upload your documents in the next step.",
+    "fullName": "Full name",
+    "contactName": "Contact person's full name",
+    "fullNamePlaceholder": "e.g. Awa Mbarga",
+    "email": "Email",
+    "city": "City",
+    "terms": "I accept the GoBert terms of use and privacy policy.",
+    "createAccount": "Create my account",
+    "continueToOnboarding": "Continue to verification",
     "errors": {
       "rate_limited": "Too many attempts. Please wait before trying again.",
       "invalid_otp": "Incorrect or expired code.",
       "network": "Connection problem. Check your network.",
-      "anonymous_disabled": "Anonymous sign-in is not enabled.",
+      "anonymous_disabled": "Guest access is not enabled.",
       "sms_disabled": "SMS sending is not configured.",
-      "invalid_phone": "Invalid phone number.",
-      "generic": "Something went wrong. Please try again."
-    }
-  },
-  "account": {
-    "title": "Account",
-    "anonymous": "Anonymous session",
-    "signedOut": "You are not signed in.",
-    "signIn": "Sign in",
-    "name": "Name",
-    "namePlaceholder": "Your name",
-    "language": "Language",
-    "savedPlaces": "Saved places",
-    "signOut": "Sign out",
-    "becomeProvider": "Become a provider",
-    "save": "Save",
-    "saving": "Saving…",
-    "saved": "Saved",
-    "phone": "Phone",
-    "anonymousHint": "Create an account to save your places and find your rides."
+      "invalid_phone": "Enter a valid phone number.",
+      "invalid_email": "Enter a valid email address.",
+      "name_required": "Please enter your full name.",
+      "role_required": "Choose an account type.",
+      "terms_required": "Please accept the terms to continue.",
+      "generic": "Something went wrong. Please try again.",
+      "invalid_credentials": "Wrong phone/email or password.",
+      "already_registered": "An account already exists. Sign in instead.",
+      "email_not_confirmed": "Confirm your email first (check your inbox).",
+      "phone_not_confirmed": "Confirm your phone number first with the SMS code.",
+      "weak_password": "The password needs at least 8 characters, including letters and digits.",
+      "blocked": "This account is blocked. Contact GoBert support.",
+      "method_disabled": "This sign-in method is not available yet. Try another one."
+    },
+    "methodLabel": "Sign-in method",
+    "methods": {
+      "sms": "SMS code",
+      "password": "Phone + password",
+      "email": "Email"
+    },
+    "methodHint": {
+      "sms": "We'll send you a 6-digit code by SMS.",
+      "password": "Use your phone number and a password.",
+      "email": "Use your email and a password, or get a sign-in link."
+    },
+    "password": "Password",
+    "passwordHint": "At least {min} characters, with letters and digits.",
+    "createWithPassword": "Create my account",
+    "signInWithPassword": "Sign in",
+    "haveAccountShort": "I already have an account",
+    "noAccount": "Create an account instead",
+    "magicLink": "Email me a link",
+    "forgot": "Forgot password?",
+    "confirmEmailSent": "Check {email}: click the link we sent to confirm your account.",
+    "magicLinkSent": "Check {email}: click the link to sign in.",
+    "resetSent": "Check {email} for a link to choose a new password.",
+    "newPasswordTitle": "Choose a new password"
   },
   "onboard": {
-    "title": "Become a provider",
-    "step": "Step",
-    "identity": "Identity",
-    "vehicle": "Vehicle",
-    "documents": "Documents",
-    "services": "Services",
-    "schedule": "Schedule",
-    "review": "Review",
-    "back": "Back",
-    "next": "Next",
-    "fullName": "Full name",
-    "phone": "Phone",
-    "vehicleType": "Vehicle type",
-    "brand": "Brand",
-    "model": "Model",
-    "plate": "Plate",
-    "year": "Year",
-    "upload": "Upload a photo",
-    "remove": "Remove",
-    "compressHint": "Images are compressed to under 200 KB.",
-    "addService": "Add a service",
-    "days": "Days",
-    "is24h": "Available 24/7",
-    "start": "Start",
-    "end": "End",
-    "saving": "Saving…",
-    "submit": "Submit",
-    "submitting": "Sending…",
-    "submitted": "Submitted",
-    "status": {
-      "pending": "Pending approval",
-      "pendingHint": "An administrator will review your application.",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "changes_requested": "Changes requested",
-      "suspended": "Suspended"
+    "title": {
+      "rider": "Rider verification",
+      "business": "Business verification"
+    },
+    "stepOf": "Step {current} of {total}",
+    "saving": "Saving draft…",
+    "savedDraft": "Draft saved automatically",
+    "steps": {
+      "about": "About you",
+      "vehicle": "Vehicle",
+      "documents": "Documents",
+      "services": "Services & prices",
+      "schedule": "Working hours",
+      "review": "Review & submit",
+      "company": "Company",
+      "fleet": "Fleet"
+    },
+    "hints": {
+      "about": "How customers will see and contact you.",
+      "vehicle": "The vehicle you will use for GoBert trips.",
+      "documents": "Take clear photos. They are only visible to GoBert admins.",
+      "services": "Choose what you offer and your starting price.",
+      "schedule": "When can customers book you?",
+      "review": "Check everything before sending it for verification.",
+      "company": "Your company's legal details.",
+      "fleet": "Vehicles you rent out. You can add more later from your dashboard."
+    },
+    "fields": {
+      "full_name": "Full name",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp number",
+      "city": "City",
+      "bio": "Short presentation",
+      "bioHint": "e.g. Experienced moto rider, I know every quartier of Bertoua.",
+      "directCalls": "Customers can call me directly",
+      "directCallsHint": "Your phone number is shown on your public profile. Otherwise customers contact you through the app only.",
+      "vehicle_type": "Vehicle type",
+      "brand": "Brand",
+      "model": "Model",
+      "plate": "Plate number",
+      "color": "Colour",
+      "year": "Year",
+      "seats": "Seats",
+      "payload_kg": "Payload (kg)",
+      "vehicle_photo": "Vehicle photo",
+      "business_name": "Company name",
+      "business_type": "Type of activity",
+      "registration_number": "RCCM number",
+      "registrationHint": "Trade register number shown on your registration certificate.",
+      "tax_id": "Taxpayer number (NIU)",
+      "address": "Address / landmark",
+      "addressPlaceholder": "e.g. Quartier Mokolo, near the pharmacy",
+      "description": "Describe your services",
+      "basePrice": "Starting price",
+      "pricePerDay": "Price per day",
+      "pricePerHour": "Price per hour",
+      "zones": "Areas served",
+      "zonesHint": "Separate with commas, e.g. Bertoua, Mokolo, Tigaza",
+      "is24h": "Available 24/7",
+      "is24hHint": "Turn off to choose days and hours.",
+      "days": "Working days",
+      "start": "From",
+      "end": "To"
+    },
+    "errors": {
+      "full_name": "Enter your full name.",
+      "phone": "Enter a phone number.",
+      "vehicle_type": "Choose a vehicle type.",
+      "brand": "Enter the brand.",
+      "model": "Enter the model.",
+      "plate": "Enter a valid plate number.",
+      "year": "Enter a valid year.",
+      "business_name": "Enter the company name.",
+      "business_type": "Choose your type of activity.",
+      "registration_number": "Enter your RCCM number.",
+      "address": "Enter an address or landmark.",
+      "doc": "This document is required.",
+      "services": "Choose at least one service.",
+      "price": "Enter a price greater than 0.",
+      "days": "Choose at least one day.",
+      "hours": "The end time must be after the start time."
+    },
+    "upload": "Take or upload a photo",
+    "compressing": "Compressing photo…",
+    "uploadFailed": "This file could not be read. Try another photo.",
+    "requiredDoc": "Required",
+    "compressHint": "Photos are compressed to under 200 KB to save your data.",
+    "fleetIntro": "Add the vehicles you rent out. They will appear in GoBert Rent as soon as your business is verified.",
+    "fleetCount": "{count, plural, =0 {No vehicles} one {# vehicle} other {# vehicles}}",
+    "consent": "I confirm that this information is accurate and that I am authorised to offer these services.",
+    "fixErrors": "Some information is missing. Fix the highlighted items.",
+    "submit": "Submit for verification",
+    "resubmit": "Resubmit for verification",
+    "goDashboard": "Go to my dashboard"
+  },
+  "verification": {
+    "pending": {
+      "title": "Under review",
+      "desc": "A GoBert admin is checking your documents. This usually takes less than 24 hours. You'll be notified."
+    },
+    "approved": {
+      "title": "You're verified",
+      "desc": "Your services are visible to customers. Welcome to GoBert!"
+    },
+    "changes_requested": {
+      "title": "Changes needed",
+      "desc": "An admin needs you to update some information before approving your account."
+    },
+    "rejected": {
+      "title": "Application rejected",
+      "desc": "Your application could not be approved. Read the note below, update it and resubmit."
+    },
+    "suspended": {
+      "title": "Account suspended",
+      "desc": "Your services are hidden from customers. Contact GoBert support."
+    },
+    "timeline": {
+      "submitted": "Submitted",
+      "review": "Admin review",
+      "live": "Live"
+    },
+    "adminNote": "Admin note",
+    "update": "Update my application",
+    "submittedOn": "Submitted on {date}",
+    "reviewedOn": "reviewed on {date}"
+  },
+  "dashboard": {
+    "hello": "Hello {name} 👋",
+    "helloGuest": "Hello 👋",
+    "customer": {
+      "guestTitle": "You're browsing as a guest",
+      "guestHint": "Create a free account to keep your trips, saved places and receipts.",
+      "guestCta": "Create account",
+      "promoTitle": "Ready for a ride?",
+      "promoSubtitle": "Verified riders near you, prices in FCFA up front.",
+      "promoCta": "Book now",
+      "whereTo": "Where are you going?",
+      "go": "Go",
+      "activeTrip": "Trip in progress",
+      "services": "Our services",
+      "onlineCount": "{count} online",
+      "recent": "Recent activity",
+      "noTrips": "No trips yet",
+      "noTripsHint": "Your rides, rentals and parcels will appear here.",
+      "explore": "Explore",
+      "directoryTitle": "Provider directory",
+      "directoryHint": "{count} verified providers online now",
+      "expressTitle": "Send a parcel",
+      "expressHint": "Delivered across Bertoua within the hour",
+      "verifiedNote": "Every GoBert rider is verified by our team."
+    },
+    "rider": {
+      "finishTitle": "Finish your rider application",
+      "finishHint": "Add your vehicle and documents so an admin can verify you. Customers will see you once you're approved.",
+      "startOnboarding": "Start my application",
+      "continueOnboarding": "Continue my application",
+      "whileWaiting": "While you wait",
+      "tip1": "Keep your phone charged and data on — requests last 30 seconds.",
+      "tip2": "Make sure your vehicle papers and insurance are up to date.",
+      "tip3": "Install GoBert on your home screen for quick access.",
+      "youAreOnline": "You're online",
+      "youAreOffline": "You're offline",
+      "waiting": "Waiting for trip requests near you…",
+      "onTrip": "Trip in progress",
+      "offlineHint": "Go online to receive trip requests.",
+      "goOnline": "GO",
+      "goOffline": "STOP",
+      "toggleFailed": "Could not change your status. Check your connection.",
+      "stats": {
+        "today": "Earned today",
+        "tripsToday": "Trips today",
+        "rating": "Rating",
+        "total": "Total earned"
+      },
+      "currentTrip": "Current trip",
+      "navigate": "Directions",
+      "arrived": "I've arrived at pickup",
+      "start": "Start the trip",
+      "complete": "Complete the trip",
+      "completeCash": "Complete · collect {amount}",
+      "recentTrips": "Recent trips",
+      "noTrips": "No trips yet",
+      "noTripsHint": "Go online to start receiving requests.",
+      "newRequest": "New trip request",
+      "accept": "Accept",
+      "decline": "Decline",
+      "lostRace": "Another rider accepted this trip first."
+    },
+    "business": {
+      "finishTitle": "Finish your business registration",
+      "finishHint": "Add your company details, services and documents so an admin can verify you.",
+      "visible": "Visible to customers",
+      "services": "Services",
+      "stats": {
+        "pending": "New requests",
+        "active": "Active rentals",
+        "fleet": "Vehicles",
+        "revenue": "Revenue"
+      },
+      "tabs": {
+        "requests": "Requests",
+        "fleet": "Fleet",
+        "deliveries": "Deliveries"
+      },
+      "hiddenUntilApproved": "Your listings stay hidden from customers until your business is verified.",
+      "noRequests": "No requests yet",
+      "noRequestsHint": "Rental requests from customers will appear here.",
+      "confirm": "Confirm",
+      "decline": "Decline",
+      "handOver": "Vehicle handed over",
+      "returned": "Vehicle returned",
+      "noFleet": "No vehicles listed",
+      "noFleetHint": "Add your cars, vans or trucks to receive rental requests."
+    },
+    "express": {
+      "title": "Delivery jobs",
+      "empty": "No delivery jobs right now.",
+      "accept": "Accept this delivery",
+      "taken": "This delivery was already taken.",
+      "pickedUp": "Parcel picked up",
+      "code": "Code",
+      "deliver": "Deliver",
+      "wrongCode": "Wrong delivery code. Ask the receiver for the 4-digit code."
     }
   },
-  "directory": { "title": "Providers", "empty": "No providers available.", "book": "Book", "callDirect": "Call" },
+  "fleet": {
+    "addTitle": "Add a vehicle",
+    "add": "Add vehicle",
+    "save": "Save vehicle",
+    "type": "Type",
+    "formError": "Fill in brand, model, a valid plate and a price per day.",
+    "withDriverHint": "The rental includes a driver.",
+    "listed": "Listed",
+    "awaiting": "Awaiting verification",
+    "hidden": "Hidden",
+    "hide": "Hide",
+    "show": "Show"
+  },
+  "profile": {
+    "memberSince": "Member since {date}",
+    "personal": "Personal information",
+    "phoneLocked": "Your phone number is your login and can't be changed here.",
+    "vehicle": "My vehicle",
+    "business": "My business",
+    "from": "from {price}",
+    "language": "Language",
+    "signOut": "Sign out",
+    "guestTitle": "Guest session",
+    "guestHint": "Create a free account to keep your trips and saved places across devices.",
+    "createAccount": "Create my account",
+    "endGuest": "End guest session",
+    "applicationMissing": "Your verification isn't finished",
+    "applicationMissingHint": "Complete your application so customers can find you."
+  },
+  "trips": {
+    "title": "My trips",
+    "tabs": {
+      "rides": "Rides",
+      "rentals": "Rentals",
+      "parcels": "Parcels"
+    },
+    "tabsShort": {
+      "rides": "Rides",
+      "rentals": "Rent",
+      "parcels": "Parcels"
+    },
+    "from": "from {place}",
+    "emptyRides": "You haven't taken a trip yet.",
+    "emptyRentals": "No rentals yet.",
+    "emptyParcels": "No parcels sent yet.",
+    "cancelRental": "Cancel this request",
+    "completed": "Completed trips",
+    "earned": "Total earned"
+  },
+  "directory": {
+    "title": "Directory",
+    "verifiedOnly": "Verified providers only",
+    "headline": "Find a rider or a transport company",
+    "subtitle": "Book through the app or, when they allow it, call or WhatsApp them directly.",
+    "search": "Search by name or plate",
+    "onlineOnly": "Online now",
+    "all": "All",
+    "empty": "No provider matches your search.",
+    "verified": "Verified",
+    "new": "New",
+    "online": "Online",
+    "offline": "Offline",
+    "openNow": "open",
+    "closed": "closed",
+    "book": "Book",
+    "seeFleet": "See vehicles",
+    "sendParcel": "Send a parcel",
+    "appOnly": "Contact through the app only",
+    "whatsappText": "Hello, I found you on GoBert.",
+    "details": "Offers",
+    "signInToContact": "Sign in to contact"
+  },
   "booking": {
-    "title": "Booking",
-    "estimate": "Fare estimate",
-    "pickFirst": "Pick a destination first.",
+    "reviewTitle": "Review your trip",
+    "pickFirst": "Choose a destination first.",
+    "destination": "Destination",
+    "pickup": "Pickup",
+    "dropoff": "Destination",
     "chooseVehicle": "Choose a vehicle",
-    "estimating": "Estimating…",
+    "vehicleHint": {
+      "moto": "Fastest · 1 passenger",
+      "taxi": "Comfort · up to 4 passengers",
+      "tricycle": "Small loads · 2 passengers",
+      "truck": "Goods and moving"
+    },
     "payment": "Payment",
-    "cash": "Cash",
-    "confirm": "Confirm",
-    "noEstimate": "Estimate unavailable.",
+    "paymentHint": {
+      "cash": "Pay the rider in cash at the end of the trip.",
+      "mtn_momo": "Pay the rider with MTN Mobile Money at the end of the trip.",
+      "orange_money": "Pay the rider with Orange Money at the end of the trip."
+    },
+    "notesPlaceholder": "Note for the rider (e.g. I'm in front of the pharmacy)",
+    "guestPhone": "Your phone number (optional)",
+    "guestPhoneHint": "Shared with the rider only after they accept, so they can reach you.",
+    "total": "Estimated total",
+    "confirm": "Book {vehicle}",
+    "queued": "You're offline. Your request will be sent automatically when you reconnect.",
     "looking": "Looking for a rider…",
-    "lookingHint": "We're finding a provider near you.",
-    "cancel": "Cancel",
-    "fare": "Fare",
-    "completed": "Ride completed",
-    "cashCollected": "Cash collected",
-    "rate": "Rate your ride",
-    "comment": "Comment (optional)",
-    "submitRating": "Send",
-    "thanks": "Thanks for your feedback!",
+    "lookingHint": "We're contacting verified riders near you. This usually takes less than a minute.",
+    "cancel": "Cancel trip",
+    "statusTitle": {
+      "accepted": "Your rider is on the way",
+      "arriving": "Your rider has arrived",
+      "in_progress": "Enjoy your trip"
+    },
     "status": {
       "requested": "Requested",
       "accepted": "Accepted",
-      "arriving": "Arriving",
-      "in_progress": "In progress",
+      "arriving": "Arrived",
+      "in_progress": "On trip",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "shareTrip": "Share trip",
+    "shareText": "I'm on a GoBert trip: {from} → {to} with {name} ({plate}).",
+    "completed": "You've arrived!",
+    "paidWith": {
+      "cash": "Pay the rider in cash",
+      "mtn_momo": "Pay the rider with MTN MoMo",
+      "orange_money": "Pay the rider with Orange Money"
+    },
+    "rate": "How was your trip with {name}?",
+    "comment": "Leave a comment (optional)",
+    "submitRating": "Send rating",
+    "thanks": "Thank you for your feedback!",
+    "bookAgain": "Book again",
+    "cancelledTitle": "Trip cancelled",
+    "cancelledHint": "This trip was cancelled. You can book again anytime.",
+    "expiredTitle": "No rider available",
+    "expiredHint": "No rider accepted in time. Try again, or call a provider from the directory.",
+    "tryAgain": "Try again",
+    "signInToRate": "Rating riders is reserved to signed-in users. Sign in — this trip stays in your history.",
+    "signInToRateCta": "Sign in to rate"
+  },
+  "rent": {
+    "title": "Rent a vehicle",
+    "headline": "Rent from verified agencies",
+    "subtitle": "Cars, minibuses and trucks — with or without a driver, by the day.",
+    "empty": "No vehicles available right now.",
+    "request": "Request",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "name": "Your name",
+    "phone": "Your phone",
+    "withDriver": "With driver",
+    "noDriver": "Without driver",
+    "deposit": "Deposit",
+    "seats": "{count} seats",
+    "days": "{count, plural, =0 {Choose dates} one {# day} other {# days}}",
+    "total": "Total",
+    "submit": "Send request",
+    "pendingHint": "No payment now. The agency confirms and contacts you.",
+    "invalidDates": "Choose valid dates (end on or after start).",
+    "contactRequired": "Enter your name and a valid phone number.",
+    "unavailable": "This vehicle is no longer available. Choose another one.",
+    "newRequest": "New request",
+    "myRentals": "My rentals",
+    "statusTitle": {
+      "requested": "Request sent",
+      "confirmed": "Rental confirmed!",
+      "declined": "Request declined",
+      "active": "Rental in progress",
+      "completed": "Rental completed",
+      "cancelled": "Request cancelled"
+    },
+    "statusHint": {
+      "requested": "The agency will confirm shortly and may call you.",
+      "confirmed": "The agency will contact you to arrange pick-up.",
+      "declined": "This vehicle isn't available for your dates. Try another one.",
+      "active": "Enjoy your rental. Drive safely!",
+      "completed": "Thanks for renting with GoBert.",
+      "cancelled": "You cancelled this request."
     }
   },
-  "provider": {
-    "dashboard": "Dashboard",
-    "goOnline": "Go online",
-    "earnings": "Earnings",
-    "today": "Today",
-    "rentals": "Rentals",
-    "noRentals": "No rentals.",
-    "online": "Online",
-    "offline": "Offline",
-    "currentTrip": "Current trip",
-    "waiting": "Waiting for requests…",
-    "offlineHint": "Go online to receive requests.",
-    "newRequest": "New request",
-    "decline": "Decline",
-    "accept": "Accept",
-    "arrived": "Arrived",
-    "start": "Start",
-    "complete": "Complete"
+  "express": {
+    "title": "GoBert Express",
+    "headline": "Send a parcel across Bertoua",
+    "subtitle": "A verified courier picks it up and delivers it. The receiver gives a code to confirm delivery.",
+    "route": "Route",
+    "from": "Pick up at",
+    "to": "Deliver to",
+    "pickupPlaceholder": "Landmark, e.g. Marché Central",
+    "dropoffPlaceholder": "Landmark, e.g. Mokolo, near the church",
+    "sender": "Sender",
+    "receiver": "Receiver",
+    "name": "Name",
+    "size": "Parcel size",
+    "notesPlaceholder": "Instructions (fragile, call before arriving…)",
+    "addPhoto": "Add a photo of the parcel (optional)",
+    "send": "Send parcel",
+    "fareNote": "Final price depends on distance. Pay the courier on pick-up.",
+    "namesRequired": "Enter the sender and receiver names.",
+    "phonesRequired": "Enter valid phone numbers for sender and receiver.",
+    "placesRequired": "Enter the pick-up and delivery places.",
+    "otp": "Delivery code",
+    "otpHint": "Share this code with the receiver only. The courier needs it to complete delivery.",
+    "newParcel": "Send another parcel",
+    "statusTitle": {
+      "requested": "Looking for a courier…",
+      "accepted": "A courier is on the way",
+      "in_transit": "Your parcel is on its way",
+      "delivered": "Parcel delivered!",
+      "cancelled": "Delivery cancelled"
+    }
   },
-  "nav": { "home": "Home", "rides": "Rides", "assistant": "Assistant", "account": "Account" },
   "map": {
     "loading": "Loading map…",
     "failed": "Unable to load the map.",
     "retry": "Retry",
-    "center": "Center on Bertoua",
-    "pickup": "Pickup point"
+    "panel": "Book a trip",
+    "whereTo": "Where to?",
+    "pinnedLocation": "Pinned location",
+    "dragHint": "Tip: drag the orange pin to adjust your pickup point.",
+    "onlineCount": "{count, plural, =0 {No rider online nearby} one {# rider online nearby} other {# riders online nearby}}",
+    "popular": "Popular places",
+    "directoryCta": "Prefer to call someone directly? Open the directory"
   },
   "geo": {
     "button": "My location",
@@ -152,63 +818,28 @@
   "search": {
     "placeholder": "Where to? (e.g. behind the central market)",
     "savedPlaces": "Saved places",
-    "home": "Home",
-    "work": "Work",
-    "market": "Market",
-    "hospital": "Hospital",
-    "carrefour": "Carrefour",
+    "results": "Results",
     "noResults": "No results found",
     "searching": "Searching…",
     "pickDestination": "Pick a destination"
   },
   "providers": {
-    "available": "providers available",
-    "nearby": "Providers nearby",
-    "offline": "Offline",
     "refreshing": "Updating…"
   },
   "offline": {
-    "banner": "You are offline. Showing last cached results.",
+    "banner": "You're offline. Showing saved data.",
     "retry": "Retry"
   },
   "saved": {
     "title": "Saved places",
-    "empty": "No saved places yet.",
-    "store": "Places are saved to your account."
-  },
-  "rent": {
-    "title": "Rent a vehicle",
-    "request": "Request",
-    "name": "Your name",
-    "withDriver": "With driver",
-    "noDriver": "Without driver",
-    "deposit": "Deposit",
-    "cancel": "Cancel",
-    "submit": "Send request",
-    "newRequest": "New request",
-    "pendingHint": "The provider will confirm your request."
-  },
-  "express": {
-    "title": "Express delivery",
-    "sender": "Sender",
-    "receiver": "Receiver",
-    "name": "Name",
-    "destination": "Destination",
-    "size": "Parcel size",
-    "addPhoto": "Add a photo (optional)",
-    "photoAdded": "Photo added",
-    "fare": "Fare",
-    "send": "Send parcel",
-    "otp": "Delivery code",
-    "otpHint": "Give this code to the courier on delivery.",
-    "deliver": "Deliver",
-    "noParcels": "No parcels.",
-    "wrongOtp": "Incorrect code."
+    "empty": "No saved places yet."
   },
   "assistant": {
-    "title": "Assistant",
+    "title": "GoBert Assistant",
+    "subtitle": "Ask me anything about GoBert",
     "welcome": "Hi! How can I help you?",
     "placeholder": "Ask your question…",
+    "send": "Send",
     "offline": "You are offline. Messages will be sent when you reconnect.",
     "offlineReply": "I'm offline right now. Try again in a moment.",
     "talkHuman": "Talk to a human",
@@ -217,7 +848,37 @@
       "taxi": "Find me a taxi near the market",
       "pricing": "What are the prices?"
     }
+  },
+  "install": {
+    "title": "Install the GoBert app",
+    "subtitle": "Faster, works offline, opens from your home screen.",
+    "cta": "Install app",
+    "close": "Close",
+    "ios1": "Tap the Share button at the bottom of Safari.",
+    "ios2": "Choose “Add to Home Screen”, then “Add”.",
+    "other1": "Open your browser menu (⋮ or ⋯).",
+    "other2": "Choose “Install app” or “Add to Home screen”.",
+    "why": "The app is free, uses very little data and needs no app store."
+  },
+  "planner": {
+    "myLocation": "My location",
+    "tapPickup": "Tap the map to set your pickup",
+    "tapDropoff": "Tap the map to set your destination",
+    "toggleSheet": "Show or hide trip panel",
+    "pickupPlaceholder": "Pickup point (or use GPS)",
+    "swap": "Swap pickup and destination",
+    "hint": "Type a place, tap the map, drag a pin or use your GPS. No account needed.",
+    "approx": "approx. distance",
+    "book": "Book {vehicle} · {price}",
+    "noAccount": "No account needed — book as a guest."
+  },
+  "providerPage": {
+    "notFound": "This provider is not available.",
+    "trips": "{count, plural, one {# trip} other {# trips}}",
+    "lockedTitle": "Sign in to see offers and contact",
+    "lockedHint": "Prices, fleet, reviews, phone and WhatsApp are visible to signed-in users. Booking a ride needs no account.",
+    "signIn": "Sign in or create an account",
+    "reviews": "Reviews",
+    "noReviews": "No reviews yet."
   }
 }
-
-

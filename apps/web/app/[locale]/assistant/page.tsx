@@ -1,7 +1,10 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useTranslations } from "next-intl";
-import { Send, ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowLeft, Send, ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string; thumbs?: "up" | "down" | null };
 
@@ -9,6 +12,8 @@ const QUICK_REPLIES = ["register", "taxi", "pricing"];
 
 export default function AssistantPage() {
   const t = useTranslations();
+  const locale = useLocale();
+  const { session } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -72,10 +77,19 @@ export default function AssistantPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col">
-      <header className="bg-forest text-white p-4 flex items-center gap-2">
-        <MessageCircle className="w-5 h-5" />
-        <h1 className="text-lg font-bold">{t("assistant.title")}</h1>
+    <div className="h-dvh bg-ivory flex flex-col">
+      <header className="bg-forest text-white px-4 h-16 flex items-center gap-3 shrink-0">
+        <Link href={`/${locale}${session ? "/dashboard" : ""}`} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 !text-white hover:bg-white/20" aria-label={t("common.back")}>
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
+          <Image src="/brand/logo-mark.png" alt="" width={28} height={28} />
+        </span>
+        <div className="flex-1">
+          <h1 className="text-base font-bold text-white leading-tight">{t("assistant.title")}</h1>
+          <p className="text-xs text-white/60">{offline ? t("assistant.offline") : t("assistant.subtitle")}</p>
+        </div>
+        <MessageCircle className="w-5 h-5 text-orange" />
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -84,7 +98,7 @@ export default function AssistantPage() {
             <p className="mb-4">{t("assistant.welcome")}</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {QUICK_REPLIES.map((k) => (
-                <button key={k} onClick={() => quick(k)} className="px-3 py-2 rounded-xl border border-grey bg-white text-sm">
+                <button key={k} onClick={() => quick(k)} className="px-4 py-2.5 rounded-full border border-green/30 bg-white text-sm font-semibold text-green hover:bg-green hover:text-white transition">
                   {t(`assistant.quick.${k}`)}
                 </button>
               ))}
@@ -94,7 +108,7 @@ export default function AssistantPage() {
 
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${m.role === "user" ? "bg-green text-green" : "bg-white text-charcoal border border-grey"}`}>
+            <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${m.role === "user" ? "bg-green text-white rounded-br-md" : "bg-white text-charcoal border border-grey rounded-bl-md"}`}>
               <div className="whitespace-pre-wrap">{m.content}</div>
               {m.role === "assistant" && (
                 <div className="flex gap-2 mt-1">
@@ -124,7 +138,7 @@ export default function AssistantPage() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="p-3 border-t border-grey bg-white">
+      <div className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-grey bg-white shrink-0">
         {offline && <div className="text-xs text-orange mb-1">{t("assistant.offline")}</div>}
         <div className="flex gap-2">
           <input
@@ -132,9 +146,9 @@ export default function AssistantPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
             placeholder={t("assistant.placeholder")}
-            className="flex-1 border border-grey rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green"
+            className="flex-1 h-12 border border-grey rounded-full px-4 text-[15px] focus:outline-none focus:border-green focus:ring-4 focus:ring-green/10"
           />
-          <button onClick={() => send(input)} disabled={typing} className="bg-green text-white rounded-xl px-4 py-2 disabled:opacity-50">
+          <button onClick={() => send(input)} disabled={typing} aria-label={t("assistant.send")} className="h-12 w-12 flex items-center justify-center bg-green text-white rounded-full disabled:opacity-50">
             <Send className="w-4 h-4" />
           </button>
         </div>

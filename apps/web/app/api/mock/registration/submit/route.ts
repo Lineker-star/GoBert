@@ -1,11 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { submitDraft } from "@/lib/mock-store";
+import { NextRequest } from "next/server";
+import { submitDraft, getDraft, validateRegistration } from "@/lib/mock-store";
+import { json, bad, body } from "@/lib/api-helpers";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { draft_id } = body;
-  if (!draft_id) return NextResponse.json({ error: "missing draft_id" }, { status: 400 });
-  const provider = submitDraft(draft_id);
-  if (!provider) return NextResponse.json({ error: "draft not found" }, { status: 404 });
-  return NextResponse.json(provider);
+  const b = await body<{ draft_id?: string }>(req);
+  if (!b.draft_id) return bad("missing draft_id");
+  const draft = getDraft(b.draft_id);
+  if (!draft) return bad("draft not found", 404);
+  const v = validateRegistration(draft.data);
+  if (!v.ok) return json({ error: "incomplete", missing: v.missing }, 422);
+  const provider = submitDraft(b.draft_id);
+  if (!provider) return bad("draft not found", 404);
+  return json(provider);
 }

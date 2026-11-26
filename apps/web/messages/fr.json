@@ -1,150 +1,816 @@
 {
-  "home": {
-    "title": "GoBert",
-    "tagline": "Move. Connect. Go.",
-    "whereTo": "Où allez-vous ?",
-    "service": { "moto": "Moto", "ride": "Course", "express": "Express", "cargo": "Cargo", "rent": "Location" },
-    "shortcut": { "home": "Maison", "work": "Travail", "market": "Marché", "hospital": "Hôpital", "carrefour": "Carrefour" }
+  "common": {
+    "loading": "Chargement…",
+    "back": "Retour",
+    "backHome": "Retour à l'accueil",
+    "next": "Suivant",
+    "save": "Enregistrer",
+    "saved": "Enregistré ✓",
+    "edit": "Modifier",
+    "remove": "Retirer",
+    "close": "Fermer",
+    "optional": "facultatif",
+    "seeAll": "Tout voir",
+    "call": "Appeler",
+    "perDay": "/ jour",
+    "perHour": "/ heure",
+    "error": "Une erreur s'est produite. Veuillez réessayer.",
+    "networkError": "Problème de connexion. Vérifiez votre réseau et réessayez."
+  },
+  "nav": {
+    "home": "Accueil",
+    "book": "Réserver",
+    "trips": "Trajets",
+    "assistant": "Assistant",
+    "profile": "Profil",
+    "dashboard": "Tableau de bord",
+    "directory": "Annuaire",
+    "rent": "Location",
+    "express": "Express",
+    "signIn": "Se connecter",
+    "ride": "Course",
+    "services": "Services",
+    "partners": "Partenaires"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification pour le moment.",
+    "kind": {
+      "provider_submitted": "Votre dossier « {name} » a été envoyé. Un administrateur va l'examiner.",
+      "provider_approved": "🎉 Votre compte est validé ! Les clients peuvent maintenant voir et réserver vos services.",
+      "provider_rejected": "Votre dossier a été refusé. Motif : {reason}",
+      "provider_changes_requested": "Un administrateur demande des modifications : {reason}",
+      "provider_suspended": "Votre compte est suspendu. Motif : {reason}",
+      "booking_accepted": "{provider} a accepté votre course et arrive.",
+      "rental_requested": "Nouvelle demande de location de {customer} pour {vehicle}.",
+      "rental_confirmed": "Votre location de {vehicle} est confirmée.",
+      "rental_declined": "Votre demande de location pour {vehicle} a été refusée.",
+      "parcel_accepted": "{provider} va livrer votre colis.",
+      "parcel_delivered": "Votre colis a été livré à {receiver}."
+    }
+  },
+  "roles": {
+    "customer": {
+      "label": "Client",
+      "short": "Réserver des courses, livraisons et locations",
+      "title": "Allez où vous voulez",
+      "desc": "Réservez une moto, un taxi, un tricycle ou un camion en quelques secondes, envoyez des colis et louez des véhicules auprès de prestataires locaux vérifiés.",
+      "point1": "Prix clairs en FCFA avant de réserver",
+      "point2": "Paiement en espèces, MTN MoMo ou Orange Money",
+      "point3": "Réservez en invité — sans compte",
+      "cta": "Commencer"
+    },
+    "rider": {
+      "label": "Rider",
+      "short": "Je possède ou conduis une moto, un taxi, un tricycle ou un camion",
+      "title": "Roulez avec GoBert, gagnez plus",
+      "desc": "Propriétaires et conducteurs de motos, taxis, tricycles et camions reçoivent les demandes de clients à proximité.",
+      "point1": "Connectez-vous quand vous voulez — vous choisissez vos horaires",
+      "point2": "Gardez vos clients : ils peuvent vous appeler directement",
+      "point3": "Badge vérifié qui inspire confiance",
+      "cta": "Devenir rider"
+    },
+    "business": {
+      "label": "Prestataire",
+      "short": "Société de livraison, location, logistique ou transport",
+      "title": "Développez votre entreprise de transport",
+      "desc": "Services de livraison, agences de location de voitures et camions, sociétés de logistique : touchez des clients dans toute la région de l'Est.",
+      "point1": "Mettez votre flotte en location à l'heure ou à la journée",
+      "point2": "Recevez des missions de livraison et de fret",
+      "point3": "Gérez vos demandes depuis un seul tableau de bord",
+      "cta": "Inscrire mon entreprise"
+    }
+  },
+  "services": {
+    "moto": {
+      "name": "Moto",
+      "desc": "Mototaxis rapides partout en ville"
+    },
+    "ride": {
+      "name": "Ride",
+      "desc": "Taxis et voitures privées"
+    },
+    "express": {
+      "name": "Express",
+      "desc": "Colis livrés en moins d'une heure"
+    },
+    "cargo": {
+      "name": "Cargo",
+      "desc": "Transport de marchandises en camion ou tricycle"
+    },
+    "rent": {
+      "name": "Location",
+      "desc": "Voitures, minibus et camions à l'heure ou à la journée"
+    },
+    "logistics": {
+      "name": "Logistique",
+      "desc": "Déménagement, fret et approvisionnement"
+    }
+  },
+  "vehicleTypes": {
+    "moto": "Moto",
+    "taxi": "Taxi / voiture",
+    "tricycle": "Tricycle",
+    "truck": "Camion"
+  },
+  "rentalTypes": {
+    "car": "Voiture",
+    "van": "Minibus / fourgon",
+    "truck": "Camion",
+    "moto": "Moto",
+    "tricycle": "Tricycle"
+  },
+  "businessTypes": {
+    "delivery": {
+      "name": "Livraison",
+      "desc": "Colis, repas, documents"
+    },
+    "car_rental": {
+      "name": "Location de véhicules",
+      "desc": "Voitures, minibus, camions"
+    },
+    "logistics": {
+      "name": "Logistique",
+      "desc": "Fret, déménagement, cargo"
+    },
+    "other": {
+      "name": "Autre transport",
+      "desc": "Bus, agences, autres"
+    }
+  },
+  "documents": {
+    "id_card": "Carte nationale d'identité (CNI)",
+    "license": "Permis de conduire",
+    "registration": "Carte grise",
+    "insurance": "Attestation d'assurance",
+    "rider_photo": "Votre photo (selfie)",
+    "business_registration": "Registre de commerce (RCCM)",
+    "manager_id": "CNI du gérant",
+    "tax_card": "Carte de contribuable (NIU)"
+  },
+  "days": {
+    "0": "Dim",
+    "1": "Lun",
+    "2": "Mar",
+    "3": "Mer",
+    "4": "Jeu",
+    "5": "Ven",
+    "6": "Sam"
+  },
+  "payments": {
+    "cash": "Espèces",
+    "mtn_momo": "MTN MoMo",
+    "orange_money": "Orange Money"
+  },
+  "status": {
+    "requested": "Demandée",
+    "accepted": "Acceptée",
+    "arriving": "Arrivé",
+    "in_progress": "En cours",
+    "completed": "Terminée",
+    "cancelled": "Annulée",
+    "expired": "Expirée",
+    "confirmed": "Confirmée",
+    "declined": "Refusée",
+    "active": "En cours",
+    "in_transit": "En route",
+    "delivered": "Livré",
+    "pending": "En vérification",
+    "approved": "Vérifié",
+    "rejected": "Refusé",
+    "changes_requested": "Modifications demandées",
+    "suspended": "Suspendu"
+  },
+  "parcelSizes": {
+    "small": {
+      "name": "Petit",
+      "desc": "Enveloppe, téléphone"
+    },
+    "medium": {
+      "name": "Moyen",
+      "desc": "Boîte à chaussures, sac"
+    },
+    "large": {
+      "name": "Grand",
+      "desc": "Carton, sac de riz"
+    }
+  },
+  "landing": {
+    "nav": {
+      "services": "Services",
+      "how": "Comment ça marche",
+      "partners": "Nous rejoindre"
+    },
+    "badge": "Né à Bertoua · Conçu pour le Cameroun",
+    "heroSubtitle": "Motos, taxis, tricycles, camions, location de véhicules et livraison express — par des riders et entreprises locaux vérifiés. Fonctionne même avec une connexion lente.",
+    "heroImageAlt": "Taxi, moto et livreur GoBert à Bertoua",
+    "ctaBook": "Réserver une course",
+    "ctaCreate": "Créer un compte",
+    "ctaJoin": "Commencer",
+    "ctaGuest": "Juste un coup d'œil ? Continuer en invité",
+    "ctaDrive": "Rouler avec GoBert",
+    "floatEta": "Votre rider arrive dans ~3 min",
+    "floatVerified": "Prestataires 100 % vérifiés",
+    "stats": {
+      "services": {
+        "value": "6",
+        "label": "services dans une seule app"
+      },
+      "verified": {
+        "value": "100 %",
+        "label": "prestataires vérifiés par l'admin"
+      },
+      "languages": {
+        "value": "FR · EN",
+        "label": "entièrement bilingue"
+      }
+    },
+    "servicesEyebrow": "Une app pour tous vos déplacements",
+    "servicesTitle": "Tout ce qui roule à Bertoua",
+    "servicesSubtitle": "D'une course en moto jusqu'au marché à un camion pour votre chantier — choisissez un service et voyez le prix avant de réserver.",
+    "audienceEyebrow": "Trois façons d'utiliser GoBert",
+    "audienceTitle": "Qui êtes-vous ?",
+    "audienceSubtitle": "Choisissez votre profil à l'inscription. Chacun a son propre tableau de bord.",
+    "howEyebrow": "Confiance & sécurité",
+    "howTitle": "Chaque rider et chaque entreprise est vérifié",
+    "howSubtitle": "Les riders et prestataires n'apparaissent aux clients qu'après la vérification de leurs documents par un administrateur GoBert.",
+    "how": {
+      "step1": {
+        "title": "Inscrivez-vous avec votre téléphone",
+        "desc": "Inscription en quelques minutes avec un code SMS. Choisissez client, rider ou prestataire."
+      },
+      "step2": {
+        "title": "Envoyez vos documents",
+        "desc": "CNI, permis, carte grise ou registre de commerce — photographiés directement avec votre téléphone."
+      },
+      "step3": {
+        "title": "Validé, vous êtes en ligne",
+        "desc": "Dès qu'un administrateur vous approuve, vos services deviennent visibles et réservables."
+      }
+    },
+    "posterAlt": "Bertoua avance avec GoBert",
+    "values": {
+      "safe": {
+        "title": "Sûr & fiable",
+        "desc": "Prestataires vérifiés, partage de trajet, SOS."
+      },
+      "local": {
+        "title": "Économie locale",
+        "desc": "Les riders et entreprises de Bertoua gagnent plus."
+      },
+      "lowData": {
+        "title": "Pensé pour la 2G/3G",
+        "desc": "Pages légères et mode hors ligne."
+      },
+      "fast": {
+        "title": "Commandez en un clic",
+        "desc": "Prix clairs, mise en relation rapide."
+      }
+    },
+    "finalTitle": "Bertoua avance avec GoBert !",
+    "finalSubtitle": "Réservez votre première course ou rejoignez-nous comme rider ou prestataire.",
+    "footer": {
+      "born": "Né à Bertoua. Conçu pour le Cameroun. Prêt pour l'Afrique.",
+      "product": "Services",
+      "partners": "Partenaires",
+      "rights": "Tous droits réservés"
+    }
   },
   "auth": {
-    "title": "Connexion",
-    "subtitle": "Connectez-vous avec votre numéro de téléphone",
-    "phonePlaceholder": "Numéro de téléphone",
-    "sendOtp": "Envoyer le code",
-    "continueAnonymous": "Continuer sans compte",
+    "sideTitle": "Move. Connect. Go.",
+    "sideSubtitle": "Un seul compte pour vos courses, livraisons et locations à Bertoua et dans la région de l'Est.",
+    "chooseRole": "Rejoindre GoBert",
+    "chooseRoleHint": "Comment allez-vous utiliser GoBert ? Ce choix est définitif.",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "signInLink": "Se connecter",
+    "or": "ou",
+    "continueAnonymous": "Continuer en invité",
+    "guestNote": "Les invités peuvent réserver. Créez un compte pour garder votre historique.",
+    "loginTitle": "Bon retour",
+    "signupTitle": {
+      "customer": "Créer votre compte client",
+      "rider": "Devenir rider GoBert",
+      "business": "Inscrire votre entreprise"
+    },
+    "phoneSubtitle": "Nous vous envoyons un code à 6 chiffres par SMS.",
+    "phoneLabel": "Numéro de téléphone",
+    "phoneHint": "Cameroun : 9 chiffres commençant par 6 (MTN, Orange, Camtel, Nexttel)",
+    "countryCode": "Indicatif",
+    "sendOtp": "Recevoir le code",
+    "sending": "Envoi…",
+    "privacy": "Votre numéro reste privé et n'est jamais montré aux autres sans votre accord.",
+    "verifyTitle": "Saisissez le code",
+    "codeSentTo": "Code envoyé au {phone}",
+    "demoOtp": "Mode démo : aucun SMS n'est envoyé — saisissez 6 chiffres au choix.",
     "otpPlaceholder": "Code à 6 chiffres",
     "verify": "Vérifier",
-    "resend": "Renvoyer le code",
-    "resendIn": "Renvoyer dans {seconds}s",
-    "changeNumber": "Changer de numéro",
     "verifying": "Vérification…",
-    "sending": "Envoi…",
+    "resend": "Renvoyer le code",
+    "resendIn": "Renvoyer dans {seconds} s",
+    "changeNumber": "Changer de numéro",
+    "profileTitle": "Complétez votre profil",
+    "profileSubtitle": "Encore quelques informations et c'est parti.",
+    "accountType": "Type de compte",
+    "verificationNotice": "Les riders et prestataires sont vérifiés par un administrateur avant que leurs services soient visibles. Vous enverrez vos documents à l'étape suivante.",
+    "fullName": "Nom complet",
+    "contactName": "Nom complet du responsable",
+    "fullNamePlaceholder": "ex. Awa Mbarga",
+    "email": "E-mail",
+    "city": "Ville",
+    "terms": "J'accepte les conditions d'utilisation et la politique de confidentialité de GoBert.",
+    "createAccount": "Créer mon compte",
+    "continueToOnboarding": "Continuer vers la vérification",
     "errors": {
-      "rate_limited": "Trop de tentatives. Veuillez patienter avant de réessayer.",
+      "rate_limited": "Trop de tentatives. Patientez avant de réessayer.",
       "invalid_otp": "Code incorrect ou expiré.",
       "network": "Problème de connexion. Vérifiez votre réseau.",
-      "anonymous_disabled": "La connexion anonyme n'est pas activée.",
+      "anonymous_disabled": "L'accès invité n'est pas activé.",
       "sms_disabled": "L'envoi de SMS n'est pas configuré.",
-      "invalid_phone": "Numéro de téléphone invalide.",
-      "generic": "Une erreur est survenue. Veuillez réessayer."
-    }
-  },
-  "account": {
-    "title": "Compte",
-    "anonymous": "Session anonyme",
-    "signedOut": "Vous n'êtes pas connecté.",
-    "signIn": "Se connecter",
-    "name": "Nom",
-    "namePlaceholder": "Votre nom",
-    "language": "Langue",
-    "savedPlaces": "Lieux enregistrés",
-    "signOut": "Se déconnecter",
-    "becomeProvider": "Devenir prestataire",
-    "save": "Enregistrer",
-    "saving": "Enregistrement…",
-    "saved": "Enregistré",
-    "phone": "Téléphone",
-    "anonymousHint": "Créez un compte pour sauvegarder vos lieux et retrouver vos courses."
+      "invalid_phone": "Saisissez un numéro valide.",
+      "invalid_email": "Saisissez une adresse e-mail valide.",
+      "name_required": "Veuillez saisir votre nom complet.",
+      "role_required": "Choisissez un type de compte.",
+      "terms_required": "Veuillez accepter les conditions pour continuer.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer.",
+      "invalid_credentials": "Téléphone/e-mail ou mot de passe incorrect.",
+      "already_registered": "Un compte existe déjà. Connectez-vous.",
+      "email_not_confirmed": "Confirmez d'abord votre e-mail (consultez votre boîte).",
+      "phone_not_confirmed": "Confirmez d'abord votre numéro avec le code SMS.",
+      "weak_password": "Le mot de passe doit contenir au moins 8 caractères, dont des lettres et des chiffres.",
+      "blocked": "Ce compte est bloqué. Contactez le support GoBert.",
+      "method_disabled": "Cette méthode de connexion n'est pas encore disponible. Essayez-en une autre."
+    },
+    "methodLabel": "Méthode de connexion",
+    "methods": {
+      "sms": "Code SMS",
+      "password": "Tél. + mot de passe",
+      "email": "E-mail"
+    },
+    "methodHint": {
+      "sms": "Nous vous envoyons un code à 6 chiffres par SMS.",
+      "password": "Utilisez votre numéro et un mot de passe.",
+      "email": "Utilisez votre e-mail et un mot de passe, ou recevez un lien de connexion."
+    },
+    "password": "Mot de passe",
+    "passwordHint": "Au moins {min} caractères, avec des lettres et des chiffres.",
+    "createWithPassword": "Créer mon compte",
+    "signInWithPassword": "Se connecter",
+    "haveAccountShort": "J'ai déjà un compte",
+    "noAccount": "Créer un compte",
+    "magicLink": "Recevoir un lien",
+    "forgot": "Mot de passe oublié ?",
+    "confirmEmailSent": "Consultez {email} : cliquez sur le lien envoyé pour confirmer votre compte.",
+    "magicLinkSent": "Consultez {email} : cliquez sur le lien pour vous connecter.",
+    "resetSent": "Consultez {email} : un lien vous permet de choisir un nouveau mot de passe.",
+    "newPasswordTitle": "Choisissez un nouveau mot de passe"
   },
   "onboard": {
-    "title": "Devenir prestataire",
-    "step": "Étape",
-    "identity": "Identité",
-    "vehicle": "Véhicule",
-    "documents": "Documents",
-    "services": "Services",
-    "schedule": "Horaires",
-    "review": "Vérification",
-    "back": "Retour",
-    "next": "Suivant",
-    "fullName": "Nom complet",
-    "phone": "Téléphone",
-    "vehicleType": "Type de véhicule",
-    "brand": "Marque",
-    "model": "Modèle",
-    "plate": "Immatriculation",
-    "year": "Année",
-    "upload": "Importer une photo",
-    "remove": "Retirer",
-    "compressHint": "Les images sont compressées à moins de 200 Ko.",
-    "addService": "Ajouter un service",
-    "days": "Jours",
-    "is24h": "Disponible 24h/24",
-    "start": "Début",
-    "end": "Fin",
-    "saving": "Enregistrement…",
-    "submit": "Soumettre",
-    "submitting": "Envoi…",
-    "submitted": "Soumis",
-    "status": {
-      "pending": "En attente de validation",
-      "pendingHint": "Un administrateur va examiner votre dossier.",
-      "approved": "Approuvé",
-      "rejected": "Rejeté",
-      "changes_requested": "Modifications demandées",
-      "suspended": "Suspendu"
+    "title": {
+      "rider": "Vérification rider",
+      "business": "Vérification entreprise"
+    },
+    "stepOf": "Étape {current} sur {total}",
+    "saving": "Enregistrement du brouillon…",
+    "savedDraft": "Brouillon enregistré automatiquement",
+    "steps": {
+      "about": "À propos de vous",
+      "vehicle": "Véhicule",
+      "documents": "Documents",
+      "services": "Services & tarifs",
+      "schedule": "Horaires",
+      "review": "Vérifier & envoyer",
+      "company": "Entreprise",
+      "fleet": "Flotte"
+    },
+    "hints": {
+      "about": "Comment les clients vous verront et vous contacteront.",
+      "vehicle": "Le véhicule que vous utiliserez pour GoBert.",
+      "documents": "Prenez des photos nettes. Seuls les administrateurs GoBert les voient.",
+      "services": "Choisissez ce que vous proposez et votre prix de départ.",
+      "schedule": "Quand les clients peuvent-ils vous réserver ?",
+      "review": "Vérifiez tout avant d'envoyer pour validation.",
+      "company": "Les informations légales de votre entreprise.",
+      "fleet": "Les véhicules que vous louez. Vous pourrez en ajouter depuis votre tableau de bord."
+    },
+    "fields": {
+      "full_name": "Nom complet",
+      "phone": "Téléphone",
+      "whatsapp": "Numéro WhatsApp",
+      "city": "Ville",
+      "bio": "Courte présentation",
+      "bioHint": "ex. Mototaxi expérimenté, je connais tous les quartiers de Bertoua.",
+      "directCalls": "Les clients peuvent m'appeler directement",
+      "directCallsHint": "Votre numéro est affiché sur votre profil public. Sinon, les clients vous contactent uniquement via l'app.",
+      "vehicle_type": "Type de véhicule",
+      "brand": "Marque",
+      "model": "Modèle",
+      "plate": "Immatriculation",
+      "color": "Couleur",
+      "year": "Année",
+      "seats": "Places",
+      "payload_kg": "Charge utile (kg)",
+      "vehicle_photo": "Photo du véhicule",
+      "business_name": "Nom de l'entreprise",
+      "business_type": "Type d'activité",
+      "registration_number": "Numéro RCCM",
+      "registrationHint": "Numéro du registre de commerce indiqué sur votre certificat.",
+      "tax_id": "Numéro de contribuable (NIU)",
+      "address": "Adresse / repère",
+      "addressPlaceholder": "ex. Quartier Mokolo, à côté de la pharmacie",
+      "description": "Décrivez vos services",
+      "basePrice": "Prix de départ",
+      "pricePerDay": "Prix par jour",
+      "pricePerHour": "Prix par heure",
+      "zones": "Zones desservies",
+      "zonesHint": "Séparez par des virgules, ex. Bertoua, Mokolo, Tigaza",
+      "is24h": "Disponible 24h/24, 7j/7",
+      "is24hHint": "Désactivez pour choisir vos jours et horaires.",
+      "days": "Jours de travail",
+      "start": "De",
+      "end": "À"
+    },
+    "errors": {
+      "full_name": "Saisissez votre nom complet.",
+      "phone": "Saisissez un numéro de téléphone.",
+      "vehicle_type": "Choisissez un type de véhicule.",
+      "brand": "Saisissez la marque.",
+      "model": "Saisissez le modèle.",
+      "plate": "Saisissez une immatriculation valide.",
+      "year": "Saisissez une année valide.",
+      "business_name": "Saisissez le nom de l'entreprise.",
+      "business_type": "Choisissez votre type d'activité.",
+      "registration_number": "Saisissez votre numéro RCCM.",
+      "address": "Saisissez une adresse ou un repère.",
+      "doc": "Ce document est obligatoire.",
+      "services": "Choisissez au moins un service.",
+      "price": "Saisissez un prix supérieur à 0.",
+      "days": "Choisissez au moins un jour.",
+      "hours": "L'heure de fin doit être après l'heure de début."
+    },
+    "upload": "Prendre ou importer une photo",
+    "compressing": "Compression de la photo…",
+    "uploadFailed": "Ce fichier n'a pas pu être lu. Essayez une autre photo.",
+    "requiredDoc": "Obligatoire",
+    "compressHint": "Les photos sont compressées sous 200 Ko pour économiser vos données.",
+    "fleetIntro": "Ajoutez les véhicules que vous louez. Ils apparaîtront dans GoBert Location dès que votre entreprise sera vérifiée.",
+    "fleetCount": "{count, plural, =0 {Aucun véhicule} one {# véhicule} other {# véhicules}}",
+    "consent": "Je confirme que ces informations sont exactes et que je suis autorisé(e) à proposer ces services.",
+    "fixErrors": "Des informations manquent. Corrigez les éléments signalés.",
+    "submit": "Envoyer pour vérification",
+    "resubmit": "Renvoyer pour vérification",
+    "goDashboard": "Aller à mon tableau de bord"
+  },
+  "verification": {
+    "pending": {
+      "title": "En cours de vérification",
+      "desc": "Un administrateur GoBert vérifie vos documents. Cela prend généralement moins de 24 heures. Vous serez notifié."
+    },
+    "approved": {
+      "title": "Vous êtes vérifié",
+      "desc": "Vos services sont visibles par les clients. Bienvenue chez GoBert !"
+    },
+    "changes_requested": {
+      "title": "Modifications nécessaires",
+      "desc": "Un administrateur vous demande de mettre à jour certaines informations avant de valider votre compte."
+    },
+    "rejected": {
+      "title": "Dossier refusé",
+      "desc": "Votre dossier n'a pas pu être validé. Lisez la note ci-dessous, corrigez et renvoyez."
+    },
+    "suspended": {
+      "title": "Compte suspendu",
+      "desc": "Vos services sont masqués pour les clients. Contactez le support GoBert."
+    },
+    "timeline": {
+      "submitted": "Envoyé",
+      "review": "Vérification",
+      "live": "En ligne"
+    },
+    "adminNote": "Note de l'administrateur",
+    "update": "Mettre à jour mon dossier",
+    "submittedOn": "Envoyé le {date}",
+    "reviewedOn": "examiné le {date}"
+  },
+  "dashboard": {
+    "hello": "Bonjour {name} 👋",
+    "helloGuest": "Bonjour 👋",
+    "customer": {
+      "guestTitle": "Vous naviguez en invité",
+      "guestHint": "Créez un compte gratuit pour garder vos trajets, lieux enregistrés et reçus.",
+      "guestCta": "Créer un compte",
+      "promoTitle": "Prêt pour une course ?",
+      "promoSubtitle": "Des riders vérifiés près de vous, prix en FCFA annoncés d'avance.",
+      "promoCta": "Réserver",
+      "whereTo": "Où allez-vous ?",
+      "go": "Go",
+      "activeTrip": "Course en cours",
+      "services": "Nos services",
+      "onlineCount": "{count} en ligne",
+      "recent": "Activité récente",
+      "noTrips": "Aucun trajet pour l'instant",
+      "noTripsHint": "Vos courses, locations et colis apparaîtront ici.",
+      "explore": "Découvrir",
+      "directoryTitle": "Annuaire des prestataires",
+      "directoryHint": "{count} prestataires vérifiés en ligne",
+      "expressTitle": "Envoyer un colis",
+      "expressHint": "Livré partout à Bertoua en moins d'une heure",
+      "verifiedNote": "Chaque rider GoBert est vérifié par notre équipe."
+    },
+    "rider": {
+      "finishTitle": "Terminez votre inscription rider",
+      "finishHint": "Ajoutez votre véhicule et vos documents pour qu'un administrateur vous vérifie. Les clients vous verront dès votre validation.",
+      "startOnboarding": "Commencer mon dossier",
+      "continueOnboarding": "Continuer mon dossier",
+      "whileWaiting": "En attendant",
+      "tip1": "Gardez votre téléphone chargé et vos données actives — les demandes durent 30 secondes.",
+      "tip2": "Vérifiez que vos papiers et votre assurance sont à jour.",
+      "tip3": "Installez GoBert sur votre écran d'accueil pour un accès rapide.",
+      "youAreOnline": "Vous êtes en ligne",
+      "youAreOffline": "Vous êtes hors ligne",
+      "waiting": "En attente de demandes près de vous…",
+      "onTrip": "Course en cours",
+      "offlineHint": "Passez en ligne pour recevoir des demandes.",
+      "goOnline": "GO",
+      "goOffline": "STOP",
+      "toggleFailed": "Impossible de changer votre statut. Vérifiez votre connexion.",
+      "stats": {
+        "today": "Gagné aujourd'hui",
+        "tripsToday": "Courses du jour",
+        "rating": "Note",
+        "total": "Total gagné"
+      },
+      "currentTrip": "Course en cours",
+      "navigate": "Itinéraire",
+      "arrived": "Je suis arrivé au départ",
+      "start": "Démarrer la course",
+      "complete": "Terminer la course",
+      "completeCash": "Terminer · encaisser {amount}",
+      "recentTrips": "Courses récentes",
+      "noTrips": "Aucune course pour l'instant",
+      "noTripsHint": "Passez en ligne pour recevoir des demandes.",
+      "newRequest": "Nouvelle demande de course",
+      "accept": "Accepter",
+      "decline": "Refuser",
+      "lostRace": "Un autre rider a accepté cette course en premier."
+    },
+    "business": {
+      "finishTitle": "Terminez l'inscription de votre entreprise",
+      "finishHint": "Ajoutez les informations de l'entreprise, vos services et documents pour qu'un administrateur vous vérifie.",
+      "visible": "Visible par les clients",
+      "services": "Services",
+      "stats": {
+        "pending": "Nouvelles demandes",
+        "active": "Locations en cours",
+        "fleet": "Véhicules",
+        "revenue": "Chiffre d'affaires"
+      },
+      "tabs": {
+        "requests": "Demandes",
+        "fleet": "Flotte",
+        "deliveries": "Livraisons"
+      },
+      "hiddenUntilApproved": "Vos annonces restent masquées pour les clients jusqu'à la vérification de votre entreprise.",
+      "noRequests": "Aucune demande pour l'instant",
+      "noRequestsHint": "Les demandes de location des clients apparaîtront ici.",
+      "confirm": "Confirmer",
+      "decline": "Refuser",
+      "handOver": "Véhicule remis",
+      "returned": "Véhicule rendu",
+      "noFleet": "Aucun véhicule en location",
+      "noFleetHint": "Ajoutez vos voitures, minibus ou camions pour recevoir des demandes."
+    },
+    "express": {
+      "title": "Missions de livraison",
+      "empty": "Aucune livraison disponible pour le moment.",
+      "accept": "Accepter cette livraison",
+      "taken": "Cette livraison a déjà été prise.",
+      "pickedUp": "Colis récupéré",
+      "code": "Code",
+      "deliver": "Livrer",
+      "wrongCode": "Code incorrect. Demandez le code à 4 chiffres au destinataire."
     }
   },
-  "directory": { "title": "Prestataires", "empty": "Aucun prestataire disponible.", "book": "Réserver", "callDirect": "Appeler" },
-  "booking": {
-    "title": "Réservation",
-    "estimate": "Estimation du tarif",
-    "pickFirst": "Choisissez d'abord une destination.",
-    "chooseVehicle": "Choisir un véhicule",
-    "estimating": "Estimation…",
-    "payment": "Paiement",
-    "cash": "Espèces",
-    "confirm": "Confirmer",
-    "noEstimate": "Estimation indisponible.",
-    "looking": "Recherche d'un prestataire…",
-    "lookingHint": "Nous cherchons un prestataire près de vous.",
-    "cancel": "Annuler",
-    "fare": "Tarif",
-    "completed": "Course terminée",
-    "cashCollected": "Espèces encaissées",
-    "rate": "Notez votre course",
-    "comment": "Commentaire (optionnel)",
-    "submitRating": "Envoyer",
-    "thanks": "Merci pour votre avis !",
-    "status": {
-      "requested": "Demandé",
-      "accepted": "Accepté",
-      "arriving": "En route",
-      "in_progress": "En cours",
-      "completed": "Terminé",
-      "cancelled": "Annulé"
-    }
+  "fleet": {
+    "addTitle": "Ajouter un véhicule",
+    "add": "Ajouter un véhicule",
+    "save": "Enregistrer le véhicule",
+    "type": "Type",
+    "formError": "Renseignez la marque, le modèle, une immatriculation valide et un prix par jour.",
+    "withDriverHint": "La location inclut un chauffeur.",
+    "listed": "En ligne",
+    "awaiting": "En attente de vérification",
+    "hidden": "Masqué",
+    "hide": "Masquer",
+    "show": "Afficher"
   },
-  "provider": {
-    "dashboard": "Tableau de bord",
-    "goOnline": "Passer en ligne",
-    "earnings": "Gains",
-    "today": "Aujourd'hui",
-    "rentals": "Locations",
-    "noRentals": "Aucune location.",
+  "profile": {
+    "memberSince": "Membre depuis le {date}",
+    "personal": "Informations personnelles",
+    "phoneLocked": "Votre numéro sert d'identifiant et ne peut pas être modifié ici.",
+    "vehicle": "Mon véhicule",
+    "business": "Mon entreprise",
+    "from": "dès {price}",
+    "language": "Langue",
+    "signOut": "Se déconnecter",
+    "guestTitle": "Session invité",
+    "guestHint": "Créez un compte gratuit pour retrouver vos trajets et lieux sur tous vos appareils.",
+    "createAccount": "Créer mon compte",
+    "endGuest": "Terminer la session invité",
+    "applicationMissing": "Votre vérification n'est pas terminée",
+    "applicationMissingHint": "Complétez votre dossier pour que les clients vous trouvent."
+  },
+  "trips": {
+    "title": "Mes trajets",
+    "tabs": {
+      "rides": "Courses",
+      "rentals": "Locations",
+      "parcels": "Colis"
+    },
+    "tabsShort": {
+      "rides": "Courses",
+      "rentals": "Loc.",
+      "parcels": "Colis"
+    },
+    "from": "depuis {place}",
+    "emptyRides": "Vous n'avez pas encore fait de course.",
+    "emptyRentals": "Aucune location pour l'instant.",
+    "emptyParcels": "Aucun colis envoyé pour l'instant.",
+    "cancelRental": "Annuler cette demande",
+    "completed": "Courses terminées",
+    "earned": "Total gagné"
+  },
+  "directory": {
+    "title": "Annuaire",
+    "verifiedOnly": "Uniquement des prestataires vérifiés",
+    "headline": "Trouvez un rider ou une société de transport",
+    "subtitle": "Réservez via l'app ou, s'ils l'autorisent, appelez-les ou écrivez-leur sur WhatsApp.",
+    "search": "Rechercher par nom ou immatriculation",
+    "onlineOnly": "En ligne",
+    "all": "Tous",
+    "empty": "Aucun prestataire ne correspond à votre recherche.",
+    "verified": "Vérifié",
+    "new": "Nouveau",
     "online": "En ligne",
     "offline": "Hors ligne",
-    "currentTrip": "Course en cours",
-    "waiting": "En attente de courses…",
-    "offlineHint": "Passez en ligne pour recevoir des courses.",
-    "newRequest": "Nouvelle demande",
-    "decline": "Refuser",
-    "accept": "Accepter",
-    "arrived": "Arrivé",
-    "start": "Démarrer",
-    "complete": "Terminer"
+    "openNow": "ouvert",
+    "closed": "fermé",
+    "book": "Réserver",
+    "seeFleet": "Voir les véhicules",
+    "sendParcel": "Envoyer un colis",
+    "appOnly": "Contact via l'app uniquement",
+    "whatsappText": "Bonjour, je vous ai trouvé sur GoBert.",
+    "details": "Offres",
+    "signInToContact": "Se connecter pour contacter"
   },
-  "nav": { "home": "Accueil", "rides": "Courses", "assistant": "Assistant", "account": "Compte" },
+  "booking": {
+    "reviewTitle": "Vérifiez votre course",
+    "pickFirst": "Choisissez d'abord une destination.",
+    "destination": "Destination",
+    "pickup": "Départ",
+    "dropoff": "Arrivée",
+    "chooseVehicle": "Choisissez un véhicule",
+    "vehicleHint": {
+      "moto": "Le plus rapide · 1 passager",
+      "taxi": "Confort · jusqu'à 4 passagers",
+      "tricycle": "Petites charges · 2 passagers",
+      "truck": "Marchandises et déménagement"
+    },
+    "payment": "Paiement",
+    "paymentHint": {
+      "cash": "Payez le rider en espèces à la fin de la course.",
+      "mtn_momo": "Payez le rider par MTN Mobile Money à la fin de la course.",
+      "orange_money": "Payez le rider par Orange Money à la fin de la course."
+    },
+    "notesPlaceholder": "Note pour le rider (ex. je suis devant la pharmacie)",
+    "guestPhone": "Votre numéro (facultatif)",
+    "guestPhoneHint": "Partagé avec le rider uniquement après acceptation, pour vous joindre.",
+    "total": "Total estimé",
+    "confirm": "Réserver · {vehicle}",
+    "queued": "Vous êtes hors ligne. Votre demande sera envoyée automatiquement à la reconnexion.",
+    "looking": "Recherche d'un rider…",
+    "lookingHint": "Nous contactons les riders vérifiés près de vous. Cela prend en général moins d'une minute.",
+    "cancel": "Annuler la course",
+    "statusTitle": {
+      "accepted": "Votre rider arrive",
+      "arriving": "Votre rider est arrivé",
+      "in_progress": "Bonne route !"
+    },
+    "status": {
+      "requested": "Demandée",
+      "accepted": "Acceptée",
+      "arriving": "Arrivé",
+      "in_progress": "En route",
+      "completed": "Terminée",
+      "cancelled": "Annulée",
+      "expired": "Expirée"
+    },
+    "shareTrip": "Partager le trajet",
+    "shareText": "Je suis en course GoBert : {from} → {to} avec {name} ({plate}).",
+    "completed": "Vous êtes arrivé !",
+    "paidWith": {
+      "cash": "Payez le rider en espèces",
+      "mtn_momo": "Payez le rider par MTN MoMo",
+      "orange_money": "Payez le rider par Orange Money"
+    },
+    "rate": "Comment s'est passée votre course avec {name} ?",
+    "comment": "Laisser un commentaire (facultatif)",
+    "submitRating": "Envoyer la note",
+    "thanks": "Merci pour votre avis !",
+    "bookAgain": "Réserver à nouveau",
+    "cancelledTitle": "Course annulée",
+    "cancelledHint": "Cette course a été annulée. Vous pouvez réserver à nouveau à tout moment.",
+    "expiredTitle": "Aucun rider disponible",
+    "expiredHint": "Aucun rider n'a accepté à temps. Réessayez ou appelez un prestataire de l'annuaire.",
+    "tryAgain": "Réessayer",
+    "signInToRate": "La notation des riders est réservée aux utilisateurs connectés. Connectez-vous — ce trajet reste dans votre historique.",
+    "signInToRateCta": "Se connecter pour noter"
+  },
+  "rent": {
+    "title": "Louer un véhicule",
+    "headline": "Louez auprès d'agences vérifiées",
+    "subtitle": "Voitures, minibus et camions — avec ou sans chauffeur, à la journée.",
+    "empty": "Aucun véhicule disponible pour le moment.",
+    "request": "Demander",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "name": "Votre nom",
+    "phone": "Votre téléphone",
+    "withDriver": "Avec chauffeur",
+    "noDriver": "Sans chauffeur",
+    "deposit": "Caution",
+    "seats": "{count} places",
+    "days": "{count, plural, =0 {Choisissez les dates} one {# jour} other {# jours}}",
+    "total": "Total",
+    "submit": "Envoyer la demande",
+    "pendingHint": "Aucun paiement maintenant. L'agence confirme et vous contacte.",
+    "invalidDates": "Choisissez des dates valides (fin le jour du début ou après).",
+    "contactRequired": "Saisissez votre nom et un numéro de téléphone valide.",
+    "unavailable": "Ce véhicule n'est plus disponible. Choisissez-en un autre.",
+    "newRequest": "Nouvelle demande",
+    "myRentals": "Mes locations",
+    "statusTitle": {
+      "requested": "Demande envoyée",
+      "confirmed": "Location confirmée !",
+      "declined": "Demande refusée",
+      "active": "Location en cours",
+      "completed": "Location terminée",
+      "cancelled": "Demande annulée"
+    },
+    "statusHint": {
+      "requested": "L'agence va confirmer rapidement et pourra vous appeler.",
+      "confirmed": "L'agence vous contacte pour organiser la remise du véhicule.",
+      "declined": "Ce véhicule n'est pas disponible à vos dates. Essayez-en un autre.",
+      "active": "Bonne location. Roulez prudemment !",
+      "completed": "Merci d'avoir loué avec GoBert.",
+      "cancelled": "Vous avez annulé cette demande."
+    }
+  },
+  "express": {
+    "title": "GoBert Express",
+    "headline": "Envoyez un colis partout à Bertoua",
+    "subtitle": "Un livreur vérifié le récupère et le livre. Le destinataire donne un code pour confirmer la livraison.",
+    "route": "Trajet",
+    "from": "Récupérer à",
+    "to": "Livrer à",
+    "pickupPlaceholder": "Repère, ex. Marché Central",
+    "dropoffPlaceholder": "Repère, ex. Mokolo, près de l'église",
+    "sender": "Expéditeur",
+    "receiver": "Destinataire",
+    "name": "Nom",
+    "size": "Taille du colis",
+    "notesPlaceholder": "Instructions (fragile, appeler avant d'arriver…)",
+    "addPhoto": "Ajouter une photo du colis (facultatif)",
+    "send": "Envoyer le colis",
+    "fareNote": "Le prix final dépend de la distance. Payez le livreur à l'enlèvement.",
+    "namesRequired": "Saisissez les noms de l'expéditeur et du destinataire.",
+    "phonesRequired": "Saisissez des numéros valides pour l'expéditeur et le destinataire.",
+    "placesRequired": "Saisissez les lieux d'enlèvement et de livraison.",
+    "otp": "Code de livraison",
+    "otpHint": "Ne partagez ce code qu'avec le destinataire. Le livreur en a besoin pour finaliser la livraison.",
+    "newParcel": "Envoyer un autre colis",
+    "statusTitle": {
+      "requested": "Recherche d'un livreur…",
+      "accepted": "Un livreur arrive",
+      "in_transit": "Votre colis est en route",
+      "delivered": "Colis livré !",
+      "cancelled": "Livraison annulée"
+    }
+  },
   "map": {
     "loading": "Chargement de la carte…",
     "failed": "Impossible de charger la carte.",
     "retry": "Réessayer",
-    "center": "Centre sur Bertoua",
-    "pickup": "Point de d\u00e9part"
+    "panel": "Réserver une course",
+    "whereTo": "Où allez-vous ?",
+    "pinnedLocation": "Point choisi",
+    "dragHint": "Astuce : déplacez l'épingle orange pour ajuster votre point de départ.",
+    "onlineCount": "{count, plural, =0 {Aucun rider en ligne à proximité} one {# rider en ligne à proximité} other {# riders en ligne à proximité}}",
+    "popular": "Lieux populaires",
+    "directoryCta": "Vous préférez appeler directement ? Ouvrez l'annuaire"
   },
   "geo": {
     "button": "Ma position",
-    "denied": "Localisation refusée. Vous pouvez saisir une adresse manuellement.",
+    "denied": "Localisation refusée. Vous pouvez saisir une adresse.",
     "unavailable": "Localisation indisponible sur cet appareil.",
     "acquired": "Position détectée",
     "fallback": "Utilisez la recherche pour choisir votre point de départ."
@@ -152,72 +818,67 @@
   "search": {
     "placeholder": "Où allez-vous ? (ex. derrière le marché central)",
     "savedPlaces": "Lieux enregistrés",
-    "home": "Maison",
-    "work": "Travail",
-    "market": "Marché",
-    "hospital": "Hôpital",
-    "carrefour": "Carrefour",
-    "noResults": "Aucun résultat trouvé",
+    "results": "Résultats",
+    "noResults": "Aucun résultat",
     "searching": "Recherche…",
     "pickDestination": "Choisir une destination"
   },
   "providers": {
-    "available": "prestataires disponibles",
-    "nearby": "Prestataires à proximité",
-    "offline": "Hors ligne",
     "refreshing": "Mise à jour…"
   },
   "offline": {
-    "banner": "Vous êtes hors ligne. Affichage des derniers résultats en cache.",
+    "banner": "Vous êtes hors ligne. Données enregistrées affichées.",
     "retry": "Réessayer"
   },
   "saved": {
     "title": "Lieux enregistrés",
-    "empty": "Aucun lieu enregistré pour le moment.",
-    "store": "Les lieux sont enregistrés sur votre compte."
-  },
-  "rent": {
-    "title": "Louer un véhicule",
-    "request": "Réserver",
-    "name": "Votre nom",
-    "withDriver": "Avec chauffeur",
-    "noDriver": "Sans chauffeur",
-    "deposit": "Caution",
-    "cancel": "Annuler",
-    "submit": "Envoyer la demande",
-    "newRequest": "Nouvelle demande",
-    "pendingHint": "Le prestataire va confirmer votre demande."
-  },
-  "express": {
-    "title": "Envoi express",
-    "sender": "Expéditeur",
-    "receiver": "Destinataire",
-    "name": "Nom",
-    "destination": "Destination",
-    "size": "Taille du colis",
-    "addPhoto": "Ajouter une photo (optionnel)",
-    "photoAdded": "Photo ajoutée",
-    "fare": "Tarif",
-    "send": "Envoyer le colis",
-    "otp": "Code de livraison",
-    "otpHint": "Communiquez ce code au livreur à la livraison.",
-    "deliver": "Livrer",
-    "noParcels": "Aucun colis.",
-    "wrongOtp": "Code incorrect."
+    "empty": "Aucun lieu enregistré pour l'instant."
   },
   "assistant": {
-    "title": "Assistant",
+    "title": "Assistant GoBert",
+    "subtitle": "Posez-moi vos questions sur GoBert",
     "welcome": "Bonjour ! Comment puis-je vous aider ?",
     "placeholder": "Posez votre question…",
+    "send": "Envoyer",
     "offline": "Vous êtes hors ligne. Les messages seront envoyés à la reconnexion.",
     "offlineReply": "Je suis hors ligne pour le moment. Réessayez dans un instant.",
     "talkHuman": "Parler à un humain",
     "quick": {
       "register": "Comment inscrire ma moto ?",
-      "taxi": "Trouver un taxi près du marché",
+      "taxi": "Trouve-moi un taxi près du marché",
       "pricing": "Quels sont les tarifs ?"
     }
+  },
+  "install": {
+    "title": "Installer l'application GoBert",
+    "subtitle": "Plus rapide, fonctionne hors ligne, s'ouvre depuis l'écran d'accueil.",
+    "cta": "Installer l'app",
+    "close": "Fermer",
+    "ios1": "Touchez le bouton Partager en bas de Safari.",
+    "ios2": "Choisissez « Sur l'écran d'accueil », puis « Ajouter ».",
+    "other1": "Ouvrez le menu du navigateur (⋮ ou ⋯).",
+    "other2": "Choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
+    "why": "L'application est gratuite, consomme très peu de données et ne passe pas par un store."
+  },
+  "planner": {
+    "myLocation": "Ma position",
+    "tapPickup": "Touchez la carte pour choisir le départ",
+    "tapDropoff": "Touchez la carte pour choisir la destination",
+    "toggleSheet": "Afficher ou masquer le panneau",
+    "pickupPlaceholder": "Point de départ (ou GPS)",
+    "swap": "Inverser départ et destination",
+    "hint": "Écrivez un lieu, touchez la carte, déplacez une épingle ou utilisez le GPS. Aucun compte requis.",
+    "approx": "distance approximative",
+    "book": "Réserver {vehicle} · {price}",
+    "noAccount": "Aucun compte requis — réservez en invité."
+  },
+  "providerPage": {
+    "notFound": "Ce prestataire n'est pas disponible.",
+    "trips": "{count, plural, one {# course} other {# courses}}",
+    "lockedTitle": "Connectez-vous pour voir les offres et contacter",
+    "lockedHint": "Tarifs, flotte, avis, téléphone et WhatsApp sont visibles une fois connecté. Réserver une course ne demande pas de compte.",
+    "signIn": "Se connecter ou créer un compte",
+    "reviews": "Avis",
+    "noReviews": "Pas encore d'avis."
   }
 }
-
-

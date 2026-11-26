@@ -6,7 +6,8 @@ type OutboxEntry = { id: string; url: string; method: string; body: unknown; cre
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB, 1);
+    // Must match the version used in public/sw.js, otherwise open() throws VersionError.
+    const req = indexedDB.open(DB, 2);
     req.onupgradeneeded = () => {
       if (!req.result.objectStoreNames.contains(STORE)) {
         req.result.createObjectStore(STORE, { keyPath: "id" });

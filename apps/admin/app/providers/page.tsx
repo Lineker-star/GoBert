@@ -1,99 +1,157 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Building2, ChevronRight, Search } from "lucide-react";
 import AdminShell from "@/components/AdminShell";
-import { getQueue, type QueueProvider } from "@/lib/admin-api";
+import { Card, Initials, PageTitle, Pill, SERVICE_LABEL, StatusBadge, VEHICLE_LABEL, BUSINESS_LABEL, dt } from "@/components/ui";
+import { getQueue, type Provider } from "@/lib/admin-api";
 
-const FILTERS = [
+const STATUSES = [
   { key: "", label: "Tous" },
   { key: "pending", label: "En attente" },
+  { key: "changes_requested", label: "Modifs demandées" },
   { key: "approved", label: "Approuvés" },
   { key: "rejected", label: "Rejetés" },
   { key: "suspended", label: "Suspendus" },
 ];
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvé",
-  rejected: "Rejeté",
-  changes_requested: "Modifs. demandées",
-  suspended: "Suspendu",
-};
+const KINDS = [
+  { key: "", label: "Riders & prestataires" },
+  { key: "rider", label: "Riders" },
+  { key: "business", label: "Prestataires" },
+];
 
 export default function ProvidersPage() {
-  const [filter, setFilter] = useState("");
-  const [list, setList] = useState<QueueProvider[]>([]);
+  const [status, setStatus] = useState("pending");
+  const [kind, setKind] = useState("");
+  const [query, setQuery] = useState("");
+  const [list, setList] = useState<Provider[] | null>(null);
 
   useEffect(() => {
-    getQueue(filter || undefined).then(setList);
-  }, [filter]);
+    const q = new URLSearchParams(window.location.search);
+    if (q.has("status")) setStatus(q.get("status") ?? "");
+    if (q.has("kind")) {
+      setKind(q.get("kind") ?? "");
+      if (!q.has("status")) setStatus("");
+    }
+  }, []);
+
+  useEffect(() => {
+    setList(null);
+    getQueue(status || undefined, kind || undefined).then(setList);
+  }, [status, kind]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (list ?? []).filter(
+      (p) => !q || p.display_name.toLowerCase().includes(q) || p.phone.includes(q) || p.vehicle?.plate.toLowerCase().includes(q) || p.business?.registration_number.toLowerCase().includes(q),
+    );
+  }, [list, query]);
 
   return (
     <AdminShell>
-      <h1 className="text-xl font-bold text-green mb-4">Prestataires</h1>
-      <div className="flex gap-2 mb-4">
-        {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`px-3 py-1.5 rounded-lg text-sm border ${
-              filter === f.key ? "bg-green border-green text-green" : "border-grey text-charcoal"
-            }`}
-          >
-            {f.label}
-          </button>
+      <PageTitle title="Vérifications" subtitle="Les riders et prestataires ne sont visibles par les clients qu'après approbation." />
+
+      <div className="flex flex-wrap gap-2">
+        {KINDS.map((k) => (
+          <Pill key={k.key} active={kind === k.key} onClick={() => setKind(k.key)}>
+            {k.label}
+          </Pill>
         ))}
       </div>
-
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-grey/40 text-charcoal/60 text-xs uppercase">
-            <tr>
-              <th className="text-left px-4 py-3">Nom</th>
-              <th className="text-left px-4 py-3">Véhicule</th>
-              <th className="text-left px-4 py-3">Immatriculation</th>
-              <th className="text-left px-4 py-3">Statut</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((p) => (
-              <tr key={p.id} className="border-t border-grey/50 hover:bg-charcoal/5">
-                <td className="px-4 py-3 font-medium text-charcoal">{p.display_name}</td>
-                <td className="px-4 py-3 text-charcoal/60">
-                  {p.vehicle.brand} {p.vehicle.model}
-                </td>
-                <td className="px-4 py-3 text-charcoal/60">{p.vehicle.plate}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs ${
-                      p.verification_status === "approved"
-                        ? "bg-green/10 text-green"
-                        : p.verification_status === "pending"
-                          ? "bg-orange/10 text-orange"
-                          : "bg-red-50 text-red-600"
-                    }`}
-                  >
-                    {STATUS_LABEL[p.verification_status] ?? p.verification_status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link href={`/providers/${p.id}`} className="text-green font-medium">
-                    Examiner →
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {list.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-charcoal/40">
-                  Aucun prestataire.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {STATUSES.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => setStatus(s.key)}
+            aria-pressed={status === s.key}
+            className={`rounded-lg px-3 h-8 text-xs font-bold transition ${status === s.key ? "bg-green text-white" : "text-charcoal/60 hover:bg-charcoal/5"}`}
+          >
+            {s.label}
+          </button>
+        ))}
+        <div className="relative ml-auto w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/40" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Nom, téléphone, plaque, RCCM…"
+            className="w-full h-10 rounded-xl border border-grey bg-white pl-9 pr-3 text-sm focus:outline-none focus:border-green"
+          />
+        </div>
       </div>
+
+      <Card className="mt-5 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-ivory text-left text-xs uppercase tracking-wider text-charcoal/50">
+              <tr>
+                <th className="px-4 py-3">Nom</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3 hidden md:table-cell">Véhicule / activité</th>
+                <th className="px-4 py-3 hidden lg:table-cell">Services</th>
+                <th className="px-4 py-3 hidden md:table-cell">Soumis le</th>
+                <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {list === null && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-charcoal/40">
+                    Chargement…
+                  </td>
+                </tr>
+              )}
+              {filtered.map((p) => (
+                <tr key={p.id} className="border-t border-grey/60 hover:bg-ivory/50">
+                  <td className="px-4 py-3">
+                    <Link href={`/providers/${p.id}`} className="flex items-center gap-3">
+                      {p.kind === "business" ? (
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-forest text-white">
+                          <Building2 className="w-4 h-4" />
+                        </span>
+                      ) : (
+                        <Initials name={p.display_name} />
+                      )}
+                      <span>
+                        <span className="block font-semibold">{p.display_name}</span>
+                        <span className="block text-xs text-charcoal/50">
+                          {p.phone} · {p.city}
+                        </span>
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`rounded-lg px-2 py-0.5 text-[11px] font-bold ${p.kind === "rider" ? "bg-orange/15 text-[#B25E0B]" : "bg-forest/10 text-forest"}`}>
+                      {p.kind === "rider" ? "Rider" : "Prestataire"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 hidden md:table-cell text-charcoal/65">
+                    {p.vehicle ? `${VEHICLE_LABEL[p.vehicle.type] ?? p.vehicle.type} · ${p.vehicle.brand} ${p.vehicle.model} · ${p.vehicle.plate}` : p.business ? BUSINESS_LABEL[p.business.type] ?? p.business.type : "—"}
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell text-charcoal/65">{p.services.map((s) => SERVICE_LABEL[s] ?? s).join(", ")}</td>
+                  <td className="px-4 py-3 hidden md:table-cell text-charcoal/55">{dt(p.submitted_at)}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={p.verification_status} />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/providers/${p.id}`} className="inline-flex items-center gap-1 font-semibold text-green">
+                      Examiner <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+              {list !== null && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-10 text-center text-charcoal/45">
+                    Aucun dossier pour ce filtre.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </AdminShell>
   );
 }

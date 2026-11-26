@@ -1,13 +1,14 @@
 /* GoBert service worker: offline shell, runtime caching, background sync for queued bookings. */
-const CACHE = "gobert-v2";
-const SHELL = ["/", "/fr", "/en", "/manifest.json", "/icon-192.svg", "/icon-512.svg", "/icon-maskable.svg"];
+const CACHE = "gobert-v3";
+// Every entry must exist: cache.addAll() is atomic and one 404 aborts the whole precache.
+const SHELL = ["/offline.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/brand/logo-full.png", "/brand/logo-mark.png"];
 
-const API_CACHE = "gobert-api-v1";
+const API_CACHE = "gobert-api-v2";
 const MAX_API_CACHE_ENTRIES = 50;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()),
+    caches.open(CACHE).then((cache) => Promise.all(SHELL.map((u) => cache.add(u).catch(() => undefined)))).then(() => self.skipWaiting()),
   );
 });
 
@@ -40,6 +41,7 @@ function isStatic(url) {
     url.pathname.startsWith("/icon") ||
     url.pathname.endsWith(".png") ||
     url.pathname.endsWith(".jpg") ||
+    url.pathname.endsWith(".webp") ||
     url.pathname.endsWith(".svg") ||
     url.pathname.endsWith(".woff2") ||
     url.pathname.endsWith(".css") ||
@@ -53,7 +55,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (!isSameOrigin(url)) return;
 
-  // Navigation: network-first, fall back to cached page or /fr
+  // Navigation: network-first, fall back to the cached page or the offline page
   if (req.mode === "navigate") {
     event.respondWith(
       fetch(req)
@@ -63,7 +65,7 @@ self.addEventListener("fetch", (event) => {
           return res;
         })
         .catch(() =>
-          caches.match(req).then((r) => r || caches.match("/fr")),
+          caches.match(req).then((r) => r || caches.match("/offline.html")),
         ),
     );
     return;
@@ -96,8 +98,7 @@ self.addEventListener("fetch", (event) => {
                 // Prune old entries
                 c.keys().then((keys) => {
                   if (keys.length > MAX_API_CACHE_ENTRIES) {
-                    keys.sort((a, b) => new Date(b.url) - new Date(a.url));
-                    c.delete(keys[0]);
+                    c.delete(keys[0]); // keys() is in insertion order: drop the oldest
                   }
                 });
               });

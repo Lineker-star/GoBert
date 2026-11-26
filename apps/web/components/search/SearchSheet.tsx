@@ -46,8 +46,8 @@ export default function SearchSheet({ near, places, onPick, onClose, open }: Sea
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-charcoal p-4 flex items-center gap-3 border-b border-charcoal/10">
-        <button onClick={onClose} className="p-2 rounded-lg text-charcoal hover:bg-charcoal/10">
+      <div className="bg-forest p-4 flex items-center gap-3">
+        <button onClick={onClose} className="p-2 rounded-full text-white hover:bg-white/10" aria-label={t("common.back")}>
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h2 className="text-lg font-semibold text-white">{t("search.pickDestination")}</h2>
@@ -60,7 +60,7 @@ export default function SearchSheet({ near, places, onPick, onClose, open }: Sea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("search.placeholder")}
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-grey bg-white/80 text-charcoal focus:outline-none focus:border-green"
+            className="w-full h-12 pl-9 pr-3 rounded-xl border border-grey bg-white text-[15px] text-charcoal focus:outline-none focus:border-green focus:ring-4 focus:ring-green/10"
           />
         </div>
 
@@ -76,12 +76,12 @@ export default function SearchSheet({ near, places, onPick, onClose, open }: Sea
               <button
                 key={p.id}
                 onClick={() => handleSaved({ lat: p.lat, lng: p.lng, label: p.label })}
-                className="w-flex flex items-center gap-2 px-3 py-2 rounded-lg border border-grey bg-white text-left text-charcoal hover:bg-charcoal/5 hover:border-green/30 transition"
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-grey bg-white text-left text-charcoal hover:bg-charcoal/5 hover:border-green/30 transition"
               >
                 <MapPin className="w-4 h-4 text-green" />
                 <div>
                   <div className="text-sm font-medium">{p.label}</div>
-                  <div className="text-xs text-charcoal/50 truncate max-w-[200px]">{p.label}</div>
+                  
                 </div>
                 <ChevronRight className="ml-auto w-3 h-3 text-charcoal/40" />
               </button>
@@ -96,7 +96,7 @@ export default function SearchSheet({ near, places, onPick, onClose, open }: Sea
           <div className="flex items-center gap-2 mb-2">
             <Search className="w-4 h-4 text-charcoal/50" />
             <span className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider">
-              R\u00e9sultats
+              {t("search.results")}
             </span>
           </div>
           {loading && (

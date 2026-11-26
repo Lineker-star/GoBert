@@ -2,6 +2,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase, type SavedPlace } from "@/lib/supabase";
 
+// Saved places stay on the device (no server table yet) — nothing personal leaves the phone.
+const USE_SUPABASE = false;
+
 const DEFAULT_PLACES: Omit<SavedPlace, "id">[] = [
   { label: "Home", lat: 4.5774, lng: 13.6846, address: "Bertoua centre" },
   { label: "Work", lat: 4.582, lng: 13.69, address: "Bertoua" },
@@ -22,7 +25,7 @@ export function useSavedPlaces(userId: string | null, anonToken: string | null) 
   const load = useCallback(async () => {
     const key = localKey(userId, anonToken);
     try {
-      if (userId && supabase) {
+      if (userId && USE_SUPABASE) {
         const { data, error } = await supabase
           .from("saved_places")
           .select("*")
@@ -65,7 +68,7 @@ export function useSavedPlaces(userId: string | null, anonToken: string | null) 
     } catch {
       // ignore
     }
-    if (userId && supabase) {
+    if (userId && USE_SUPABASE) {
       try {
         await supabase.from("saved_places").insert({ ...entry, user_id: userId });
       } catch {
@@ -73,7 +76,7 @@ export function useSavedPlaces(userId: string | null, anonToken: string | null) 
       }
     }
     return entry;
-  }, [places, userId, anonToken, supabase]);
+  }, [places, userId, anonToken]);
 
   const remove = useCallback(async (id: string) => {
     const next = places.filter((p) => p.id !== id);
@@ -84,7 +87,7 @@ export function useSavedPlaces(userId: string | null, anonToken: string | null) 
     } catch {
       // ignore
     }
-    if (userId && supabase) {
+    if (userId && USE_SUPABASE) {
       try {
         await supabase.from("saved_places").delete().eq("id", id);
       } catch {

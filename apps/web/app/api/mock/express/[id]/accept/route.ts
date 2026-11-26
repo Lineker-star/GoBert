@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { acceptParcel } from "@/lib/mock-store";
+import { json, bad, body, type RouteCtx } from "@/lib/api-helpers";
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: RouteCtx) {
   const { id } = await params;
-  const body = await req.json();
-  const ok = acceptParcel(id, body.provider_id ?? "00000000-0000-0000-0000-000000000001");
-  return NextResponse.json({ ok });
+  const b = await body<{ provider_id?: string }>(req);
+  if (!b.provider_id) return bad("missing provider_id");
+  return json({ ok: acceptParcel(id, b.provider_id) });
 }
