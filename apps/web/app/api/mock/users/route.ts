@@ -24,14 +24,15 @@ export async function POST(req: NextRequest) {
     city?: string;
     language?: "fr" | "en";
   }>(req);
-  if (!b.id || !b.phone) return bad("missing id or phone");
+  if (!b.id) return bad("missing id");
+  if (!b.phone && !b.email) return bad("missing phone or email");
   if (!b.full_name?.trim()) return bad("missing full_name");
   if (!b.role || !ROLES.includes(b.role)) return bad("invalid role");
   if (b.email && !EMAIL.test(b.email)) return bad("invalid email");
   return json(
     upsertUser({
       id: b.id,
-      phone: b.phone,
+      phone: b.phone ?? "",
       full_name: b.full_name,
       role: b.role,
       email: b.email ?? null,

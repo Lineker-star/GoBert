@@ -107,13 +107,25 @@ export default function TripPlanner() {
     setEstimates({});
     if (!pickup || !dropoff) return;
     const ctrl = new AbortController();
+    let refined = false;
+    const fares = (distance?: number) =>
+      Promise.all(RIDER_VEHICLES.map((v) => estimateFare(pickup, dropoff, v, distance).then((e) => [v, e] as const).catch(() => null))).then((list) => {
+        const next: Partial<Record<RiderVehicle, Estimate>> = {};
+        list.forEach((x) => x && (next[x[0]] = x[1]));
+        return next;
+      });
+    // Show prices right away from the straight-line distance, then refine with the road route
+    // (the public routing server can take several seconds on mobile networks).
+    void fares().then((quick) => {
+      if (!ctrl.signal.aborted && !refined) setEstimates(quick);
+    });
     getRoute(pickup, dropoff, ctrl.signal).then((r) => {
       if (ctrl.signal.aborted) return;
       setRoute(r);
-      Promise.all(RIDER_VEHICLES.map((v) => estimateFare(pickup, dropoff, v, r.distance_m).then((e) => [v, e] as const).catch(() => null))).then((list) => {
-        if (ctrl.signal.aborted) return;
-        const next: Partial<Record<RiderVehicle, Estimate>> = {};
-        list.forEach((x) => x && (next[x[0]] = x[1]));
+      if (!r.road) return; // straight-line fallback: the quick estimate already covers it
+      void fares(r.distance_m).then((next) => {
+        if (ctrl.signal.aborted || Object.keys(next).length === 0) return;
+        refined = true;
         setEstimates(next);
       });
     });
@@ -328,7 +340,7 @@ export default function TripPlanner() {
               )}
               {error && <Alert tone="red">{error}</Alert>}
               <Button block size="lg" variant="accent" onClick={book} loading={booking} disabled={!estimate}>
-                {t("planner.book", { vehicle: t(`vehicleTypes.${vehicle}`), price: estimate ? formatXAF(estimate.fare_estimate_xaf, locale) : "" })}
+                {t("planner.book", { vehicle: t(`vehicleTypes.${vehicle}`), price: estimate ? formatXAF(estimate.fare_estimate_xaf, locale) : "…" })}
               </Button>
               {!session && (
                 <p className="flex items-center justify-center gap-1.5 text-center text-xs text-charcoal/55">

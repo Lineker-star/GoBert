@@ -214,14 +214,14 @@ export default function AppShell({
   const locale = useLocale();
   const pathname = usePathname() ?? "";
   const t = useTranslations();
-  const { session, profile, isAnonymous, loading, profileLoading } = useAuth();
+  const { session, profile, isAnonymous, loading, profileLoading, profileMissing } = useAuth();
   const router = useRouter();
   const nav = useNav();
   const rel = pathname.replace(/^\/(fr|en)/, "") || "";
 
   // Signed in (e.g. after clicking the email confirmation link) but sign-up not finished:
   // send the user to the profile step on every page, not only on protected ones.
-  const needsProfile = !loading && !profileLoading && !!session && !isAnonymous && !profile;
+  const needsProfile = !loading && !profileLoading && profileMissing;
   useEffect(() => {
     if (needsProfile) router.replace(`/${locale}/auth?step=profile`);
   }, [needsProfile, router, locale]);
@@ -312,7 +312,7 @@ export function RequireAuth({
   allowVisitor?: boolean;
   roles?: ("customer" | "rider" | "business")[];
 }) {
-  const { session, loading, profile, profileLoading, isAnonymous } = useAuth();
+  const { session, loading, profile, profileLoading, profileMissing, isAnonymous } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const pathname = usePathname();
@@ -320,8 +320,10 @@ export function RequireAuth({
 
   const needsLogin = !loading && !session && !allowVisitor;
   const guestBlocked = !loading && isAnonymous && !allowGuest;
-  const needsProfile = !loading && !profileLoading && !!session && !isAnonymous && !profile;
-  const wrongRole = !loading && !!profile && !!roles && !roles.includes(profile.role);
+  const needsProfile = !loading && !profileLoading && profileMissing;
+  // Administrators use the public app like customers; their powers live in the admin console.
+  const effectiveRole = profile?.role === "admin" ? "customer" : profile?.role;
+  const wrongRole = !loading && !!effectiveRole && !!roles && !roles.includes(effectiveRole);
   const guestRoleBlocked = !loading && (isAnonymous || !session) && !!roles && !roles.includes("customer");
 
   useEffect(() => {

@@ -81,6 +81,7 @@ export type Activity = {
   parcels: { id: string; status: string; sender_name: string; receiver_name: string; pickup: { label: string }; dropoff: { label: string }; fare_xaf: number; size: string; created_at: string; provider_name: string | null }[];
 };
 
+export type DayStat = { day: string; trips: number; completed: number; cancelled: number; revenue_xaf: number; rentals: number; parcels: number; signups: number; applications: number };
 export type AuditRow = { id: string; actor: string | null; actor_name: string | null; action: string; entity: string; entity_id: string | null; reason: string | null; at: string };
 export type PricingRule = { vehicle_type: string; base_fare: number; per_km: number; per_min: number; min_fare: number };
 export type AISettings = { id?: string; enabled: boolean; model: string; system_prompt: string; rate_limit?: number; usage?: { requests: number; input_tokens: number; output_tokens: number } };
@@ -120,6 +121,9 @@ async function rpcResult(fn: string, args: Record<string, unknown>): Promise<{ o
 
 // ------------------------------------------------------------------ reads
 
+/** null when the statistics function is unavailable (migration 202611260005 not applied). */
+export const getStats = (days = 14): Promise<DayStat[] | null> =>
+  USE_MOCKS ? get<DayStat[]>(`/api/mock/admin/stats?days=${days}`) : rpc<DayStat[]>("admin_stats", { p_days: days });
 export const getOverview = () => (USE_MOCKS ? get<Overview>("/api/mock/admin/overview") : rpc<Overview>("admin_overview"));
 
 export async function getQueue(status?: string, kind?: string): Promise<Provider[]> {

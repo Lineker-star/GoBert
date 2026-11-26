@@ -125,7 +125,7 @@ function ProfileContent() {
       </Card>
 
       {provider && <VerificationPanel provider={provider} compact onEdit={provider.verification_status === "changes_requested" || provider.verification_status === "rejected" ? () => router.push(`/${locale}/onboard`) : undefined} />}
-      {!provider && profile.role !== "customer" && (
+      {!provider && (profile.role === "rider" || profile.role === "business") && (
         <Alert tone="orange" title={t("profile.applicationMissing")} action={<Button href={`/${locale}/onboard`} size="sm" variant="accent">{t("dashboard.rider.startOnboarding")}</Button>}>
           {t("profile.applicationMissingHint")}
         </Alert>
@@ -229,7 +229,7 @@ function ProfileContent() {
       )}
 
       {/* Saved places (customers) */}
-      {profile.role === "customer" && (
+      {(profile.role === "customer" || profile.role === "admin") && (
         <Card className="p-5">
           <SectionTitle>{t("saved.title")}</SectionTitle>
           {places.length === 0 ? (

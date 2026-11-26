@@ -7,3 +7,5 @@ node_modules/
 # Mock backend data (apps/web/.mock-data)
 .mock-data/
 .next-preview/
+.next-mock/
+.next-build/

@@ -22,7 +22,7 @@ import { useIncomingRequests } from "@/hooks/useIncomingRequests";
 import { useBooking } from "@/hooks/useBooking";
 import { acceptBooking, declineBooking, setBookingStatus, type Booking } from "@/lib/booking-api";
 import { acceptParcel, deliverParcel, getProviderBookings, getProviderParcels, pickupParcel, setOnline } from "@/lib/api";
-import { formatDate, formatKm, formatXAF, whatsappLink } from "@/lib/format";
+import { dayInDouala, formatDate, formatKm, formatXAF, todayISO, whatsappLink } from "@/lib/format";
 import { Alert, Badge, Button, Card, EmptyState, Input, PageLoader, RouteLine, STATUS_TONE, SectionTitle, Stat, cx } from "@/components/ui/primitives";
 import { VEHICLE_ICON } from "@/components/ui/brand";
 import { VerificationPanel } from "./VerificationPanel";
@@ -203,11 +203,17 @@ function ApprovedRider({ provider, onChange }: { provider: MockProvider; onChang
     }
   };
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const stats = useMemo(() => {
     const done = trips.filter((b) => b.status === "completed");
-    const todays = done.filter((b) => (b.completed_at ?? "").slice(0, 10) === today);
-    return { todayEarnings: todays.reduce((s, b) => s + (b.fare_final_xaf ?? 0), 0), todayTrips: todays.length };
+    const todays = done.filter((b) => dayInDouala(b.completed_at) === today);
+    // Last 7 days, oldest first, for the earnings chart.
+    const week = Array.from({ length: 7 }, (_, i) => {
+      const day = dayInDouala(new Date(Date.now() - (6 - i) * 86_400_000));
+      const list = done.filter((b) => dayInDouala(b.completed_at) === day);
+      return { day, earnings: list.reduce((s, b) => s + (b.fare_final_xaf ?? b.fare_estimate_xaf ?? 0), 0), trips: list.length };
+    });
+    return { todayEarnings: todays.reduce((s, b) => s + (b.fare_final_xaf ?? 0), 0), todayTrips: todays.length, week };
   }, [trips, today]);
 
   const VIcon = VEHICLE_ICON[provider.vehicle?.type ?? "moto"];
@@ -252,6 +258,8 @@ function ApprovedRider({ provider, onChange }: { provider: MockProvider; onChang
         <Stat label={t("dashboard.rider.stats.rating")} value={provider.rating_count ? `${provider.rating_avg.toFixed(1)} ★` : "—"} icon={<Star className="w-5 h-5" />} tone="orange" />
         <Stat label={t("dashboard.rider.stats.total")} value={formatXAF(provider.earnings_xaf, locale)} icon={<CalendarDays className="w-5 h-5" />} />
       </div>
+
+      <WeekEarnings week={stats.week} />
 
       {/* Current trip */}
       {current && ACTIVE.includes(current.status) && (
@@ -492,5 +500,39 @@ export function ExpressJobs({ providerId, parcels, onChange }: { providerId: str
         )}
       </Card>
     </section>
+  );
+}
+
+/** Earnings for the last 7 days as a small bar chart. */
+function WeekEarnings({ week }: { week: { day: string; earnings: number; trips: number }[] }) {
+  const t = useTranslations("dashboard.rider.week");
+  const locale = useLocale();
+  const max = Math.max(1, ...week.map((d) => d.earnings));
+  const total = week.reduce((s, d) => s + d.earnings, 0);
+  const trips = week.reduce((s, d) => s + d.trips, 0);
+  const weekday = (day: string) => new Date(`${day}T12:00:00`).toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { weekday: "short" });
+  return (
+    <Card className="p-5">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <SectionTitle className="!mb-0">{t("title")}</SectionTitle>
+          <p className="text-xs text-charcoal/50">{t("trips", { count: trips })}</p>
+        </div>
+        <p className="text-2xl font-extrabold text-green">{formatXAF(total, locale)}</p>
+      </div>
+      <div className="mt-4 flex h-28 items-end gap-2">
+        {week.map((d, i) => (
+          <div key={d.day} className="flex flex-1 flex-col items-center gap-1.5" title={`${formatXAF(d.earnings, locale)} · ${d.trips}`}>
+            <div className="flex h-20 w-full items-end">
+              <div
+                className={cx("w-full rounded-t-lg transition-all", i === week.length - 1 ? "bg-green" : "bg-green/35")}
+                style={{ height: `${d.earnings ? Math.max(6, (d.earnings / max) * 100) : 3}%` }}
+              />
+            </div>
+            <span className={cx("text-[11px] capitalize", i === week.length - 1 ? "font-bold text-charcoal" : "text-charcoal/45")}>{weekday(d.day)}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }

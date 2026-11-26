@@ -36,7 +36,7 @@ export default function AuthPage() {
   const locale = useLocale();
   const router = useRouter();
   const auth = useAuth();
-  const { session, profile, loading, profileLoading, isAnonymous, isMock } = auth;
+  const { session, profile, loading, profileLoading, profileMissing, isAnonymous, isMock } = auth;
 
   const [step, setStep] = useState<Step>("role");
   const [role, setRole] = useState<UserRole | null>(null);
@@ -90,10 +90,10 @@ export default function AuthPage() {
     if (!ready || loading || profileLoading || finishing.current || step === "reset") return;
     if (session && !isAnonymous && profile) {
       router.replace(profile.role === "customer" ? next || `/${locale}` : `/${locale}/dashboard`);
-    } else if (session && !isAnonymous && !profile && step !== "profile") {
+    } else if (profileMissing && step !== "profile") {
       setStep("profile");
     }
-  }, [ready, loading, profileLoading, session, isAnonymous, profile, step, router, locale, next]);
+  }, [ready, loading, profileLoading, session, isAnonymous, profile, profileMissing, step, router, locale, next]);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -152,7 +152,9 @@ export default function AuthPage() {
     setError(null);
     setNotice(null);
     setBusy(true);
-    const creds = method === "email" ? { email: loginEmail, password } : { phone: fullPhone, password };
+    // After confirming their email, people come back straight to the profile step with the account type they picked.
+    const confirmUrl = `${window.location.origin}/${locale}/auth?step=profile${role ? `&role=${role}` : ""}${next ? `&next=${encodeURIComponent(next)}` : ""}`;
+    const creds = method === "email" ? { email: loginEmail, password, redirectTo: confirmUrl } : { phone: fullPhone, password };
     if (mode === "signup") {
       const res = await auth.signUpWithPassword(creds);
       setBusy(false);

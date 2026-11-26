@@ -1,5 +1,6 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { fileURLToPath } from "url";
 
 const withNextIntl = createNextIntlPlugin("./i18n.ts");
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
@@ -42,9 +43,13 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // This app has its own lockfile; don't let Next guess the monorepo root.
+  outputFileTracingRoot: fileURLToPath(new URL(".", import.meta.url)),
   // Lets a second instance (e.g. CI or a preview build) run without clobbering the dev server's .next.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 7,
     remotePatterns: [
       { protocol: "https", hostname: "i.pravatar.cc" },
       { protocol: "https", hostname: "tile.openstreetmap.org" },
@@ -53,6 +58,9 @@ const nextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      // Static brand images and icons rarely change: cache them for a week on phones and the CDN.
+      { source: "/brand/:file*", headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }] },
+      { source: "/:icon(icon-192.png|icon-512.png|icon-maskable.png|apple-touch-icon.png|favicon-48.png|og-image.jpg)", headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }] },
       { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache" }, { key: "Service-Worker-Allowed", value: "/" }] },
     ];
   },

@@ -1,3 +1,5 @@
+import { fileURLToPath } from "url";
+
 /**
  * The admin console is only reachable under a secret path, e.g.
  *   ADMIN_BASE_PATH=/ops-7f3k9q2m8x  →  https://admin.example.cm/ops-7f3k9q2m8x/login
@@ -38,6 +40,8 @@ const csp = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // This app has its own lockfile; don't let Next guess the monorepo root.
+  outputFileTracingRoot: fileURLToPath(new URL(".", import.meta.url)),
   basePath: basePath || undefined,
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
   // Lets a second instance (e.g. CI or a preview build) run without clobbering the dev server's .next.

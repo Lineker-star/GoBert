@@ -29,7 +29,7 @@ export async function getRoute(a: LatLng, b: LatLng, signal?: AbortSignal): Prom
   try {
     const url = `${OSRM}/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`;
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const timer = setTimeout(() => ctrl.abort(), 5000);
     signal?.addEventListener("abort", () => ctrl.abort());
     const res = await fetch(url, { signal: ctrl.signal });
     clearTimeout(timer);

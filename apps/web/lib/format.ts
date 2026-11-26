@@ -36,6 +36,13 @@ export function todayISO(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
 }
 
+/** The Douala calendar day (yyyy-mm-dd) of a timestamp. */
+export function dayInDouala(iso: string | Date | null | undefined): string {
+  if (!iso) return "";
+  const d = typeof iso === "string" ? new Date(iso) : iso;
+  return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
+}
+
 /** Cameroon mobile numbers: 9 digits starting with 6 (MTN, Orange, Camtel, Nexttel). */
 export function isValidCameroonMobile(local: string): boolean {
   return /^6\d{8}$/.test(local.replace(/\D/g, ""));

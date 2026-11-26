@@ -4,13 +4,28 @@ import Link from "next/link";
 import { ArrowRight, Banknote, Bike, Building2, CalendarDays, KeyRound, Package, ShieldCheck, Users } from "lucide-react";
 import AdminShell from "@/components/AdminShell";
 import { Card, PageTitle, StatusBadge, dt, fcfa } from "@/components/ui";
-import { getOverview, getQueue, type Overview, type Provider } from "@/lib/admin-api";
+import { getOverview, getQueue, getStats, type DayStat, type Overview, type Provider } from "@/lib/admin-api";
+import TrendChart from "@/components/TrendChart";
+import ExportButton from "@/components/ExportButton";
 
 const DECISION_STATUS: Record<string, string> = { approve: "approved", reject: "rejected", request_changes: "changes_requested", suspend: "suspended" };
 
 export default function OverviewPage() {
   const [data, setData] = useState<Overview | null>(null);
   const [queue, setQueue] = useState<Provider[]>([]);
+  const [days, setDays] = useState(14);
+  const [stats, setStats] = useState<DayStat[] | null | undefined>(undefined);
+
+  useEffect(() => {
+    let alive = true;
+    const load = () => getStats(days).then((s) => alive && setStats(s));
+    load();
+    const id = setInterval(load, 60_000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [days]);
 
   useEffect(() => {
     const load = () => {
@@ -51,6 +66,62 @@ export default function OverviewPage() {
           </Link>
         ))}
       </div>
+
+      <Card className="mt-6 p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-bold">Tendances</h2>
+            <p className="text-xs text-charcoal/50">Par jour, heure du Cameroun.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={days}
+              onChange={(e) => setDays(Number(e.target.value))}
+              aria-label="Période"
+              className="h-10 rounded-xl border border-grey bg-white px-3 text-sm font-semibold"
+            >
+              <option value={7}>7 jours</option>
+              <option value={14}>14 jours</option>
+              <option value={30}>30 jours</option>
+              <option value={90}>90 jours</option>
+            </select>
+            <ExportButton
+              name={`gobert-statistiques-${days}j`}
+              rows={stats}
+              columns={[
+                { label: "Jour", value: (d) => d.day },
+                { label: "Courses", value: (d) => d.trips },
+                { label: "Terminées", value: (d) => d.completed },
+                { label: "Annulées/expirées", value: (d) => d.cancelled },
+                { label: "Revenu (FCFA)", value: (d) => d.revenue_xaf },
+                { label: "Locations", value: (d) => d.rentals },
+                { label: "Colis", value: (d) => d.parcels },
+                { label: "Inscriptions", value: (d) => d.signups },
+                { label: "Dossiers soumis", value: (d) => d.applications },
+              ]}
+            />
+          </div>
+        </div>
+        {stats === undefined ? (
+          <div className="h-56 animate-pulse rounded-xl bg-ivory" />
+        ) : stats === null ? (
+          <p className="rounded-xl bg-ivory p-4 text-sm text-charcoal/60">
+            Statistiques indisponibles. Appliquez la migration <code>202611260005_admin_stats.sql</code> sur la base Supabase.
+          </p>
+        ) : (
+          <TrendChart
+            data={stats}
+            series={[
+              { key: "trips", label: "Courses", color: "#087C55" },
+              { key: "revenue_xaf", label: "Revenu", color: "#123D32", format: fcfa },
+              { key: "signups", label: "Inscriptions", color: "#F28C28" },
+              { key: "applications", label: "Dossiers", color: "#B25E0B" },
+              { key: "rentals", label: "Locations", color: "#0E9F6E" },
+              { key: "parcels", label: "Colis", color: "#64748B" },
+            ]}
+          />
+        )}
+      </Card>
 
       {o && (
         <Card className="mt-6 p-5">

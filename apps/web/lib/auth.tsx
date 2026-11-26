@@ -11,7 +11,7 @@ const SESSION_KEY = "gobert:session";
 export const MIN_PASSWORD = 8;
 
 export type Profile = MockUser;
-export type Credentials = { phone?: string; email?: string; password: string };
+export type Credentials = { phone?: string; email?: string; password: string; /** Where the email confirmation link lands. */ redirectTo?: string };
 type AuthResult = { error: string | null };
 type SignInResult = AuthResult & { hasProfile: boolean; role: UserRole | null };
 
@@ -23,6 +23,8 @@ type AuthContextValue = {
   /** Registered profile (null for guests and for users who haven't finished sign-up). */
   profile: Profile | null;
   profileLoading: boolean;
+  /** True only when the server confirmed that this signed-in account has no profile yet. */
+  profileMissing: boolean;
   role: UserRole | null;
   isMock: boolean;
   /** Method 1 — phone + SMS code */
@@ -108,12 +110,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [profileMissing, setProfileMissing] = useState(false);
   const sessionRef = useRef<Session | null>(null);
   sessionRef.current = session;
 
   const loadProfile = useCallback(async (s: Session | null): Promise<Profile | null> => {
     if (!s || s.user.is_anonymous) {
       setProfile(null);
+      setProfileMissing(false);
       return null;
     }
     setProfileLoading(true);
@@ -123,8 +127,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw e;
       });
       setProfile(p);
+      setProfileMissing(!p);
       return p;
     } catch {
+      // Network or server error: keep what we had; never treat it as "no profile".
       return null;
     } finally {
       setProfileLoading(false);
@@ -213,7 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const code = await guestCode();
       const { data, error } = c.email
-        ? await supabase.auth.signUp({ email: c.email, password: c.password, options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` } })
+        ? await supabase.auth.signUp({ email: c.email, password: c.password, options: { emailRedirectTo: c.redirectTo ?? `${window.location.origin}${window.location.pathname}` } })
         : await supabase.auth.signUp({ phone: c.phone!, password: c.password });
       if (error) return { error: friendlyError(error.message), needsConfirmation: null };
       if (!data.session) return { error: null, needsConfirmation: c.email ? "email" : "sms" };
@@ -267,6 +273,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     setProfile(null);
+    setProfileMissing(false);
     if (USE_MOCKS) {
       writeStored(null);
       setSession(null);
@@ -290,6 +297,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           language: input.language,
         });
         setProfile(p);
+        setProfileMissing(false);
         return { error: null };
       } catch (e) {
         return { error: friendlyError(e instanceof Error ? e.message : undefined) };
@@ -323,6 +331,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAnonymous: !!session?.user?.is_anonymous,
       profile,
       profileLoading,
+      profileMissing: !!session && !session.user.is_anonymous && profileMissing,
       role: profile?.role ?? null,
       isMock: USE_MOCKS,
       signInWithPhone,
@@ -343,6 +352,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       profile,
       profileLoading,
+      profileMissing,
       signInWithPhone,
       verifyOtp,
       resendOtp,

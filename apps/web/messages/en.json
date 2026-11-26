@@ -15,7 +15,8 @@
     "perDay": "/ day",
     "perHour": "/ hour",
     "error": "Something went wrong. Please try again.",
-    "networkError": "Connection problem. Check your network and try again."
+    "networkError": "Connection problem. Check your network and try again.",
+    "retry": "Try again"
   },
   "nav": {
     "home": "Home",
@@ -79,6 +80,12 @@
       "point2": "Receive delivery and cargo jobs",
       "point3": "Manage requests from one dashboard",
       "cta": "Register my business"
+    },
+    "admin": {
+      "label": "Administrator",
+      "short": "Manages GoBert from the admin console",
+      "title": "Administrator",
+      "desc": "Manages GoBert from the admin console"
     }
   },
   "services": {
@@ -551,7 +558,11 @@
       "newRequest": "New trip request",
       "accept": "Accept",
       "decline": "Decline",
-      "lostRace": "Another rider accepted this trip first."
+      "lostRace": "Another rider accepted this trip first.",
+      "week": {
+        "title": "My earnings, last 7 days",
+        "trips": "{count, plural, =0 {No completed trips} one {# completed trip} other {# completed trips}}"
+      }
     },
     "business": {
       "finishTitle": "Finish your business registration",

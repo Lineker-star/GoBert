@@ -21,6 +21,8 @@ export default function ProviderPage() {
   const registered = !!session && !isAnonymous;
   const [basic, setBasic] = useState<PublicProvider | null | undefined>(undefined);
   const [offers, setOffers] = useState<ProviderOffers | null>(null);
+  const [offersError, setOffersError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     getPublicProvider(id).then(setBasic).catch(() => setBasic(null));
@@ -28,8 +30,14 @@ export default function ProviderPage() {
 
   useEffect(() => {
     if (!registered) return;
-    getProviderOffers(id).then(setOffers).catch(() => setOffers(null));
-  }, [id, registered]);
+    setOffersError(false);
+    getProviderOffers(id)
+      .then(setOffers)
+      .catch(() => {
+        setOffers(null);
+        setOffersError(true);
+      });
+  }, [id, registered, attempt]);
 
   if (basic === undefined || loading) return <PageLoader label={t("common.loading")} />;
   if (basic === null) {
@@ -101,6 +109,13 @@ export default function ProviderPage() {
             <p className="mx-auto mt-1 max-w-sm text-sm text-charcoal/60">{t("providerPage.lockedHint")}</p>
             <Button href={signInHref} className="mt-5">
               {t("providerPage.signIn")}
+            </Button>
+          </Card>
+        ) : offersError ? (
+          <Card className="p-6 text-center">
+            <p className="text-sm text-charcoal/70">{t("common.networkError")}</p>
+            <Button variant="outline" className="mt-4" onClick={() => setAttempt((n) => n + 1)}>
+              {t("common.retry")}
             </Button>
           </Card>
         ) : !offers ? (

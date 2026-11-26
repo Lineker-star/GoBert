@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Building2, ChevronRight, Search } from "lucide-react";
 import AdminShell from "@/components/AdminShell";
-import { Card, Initials, PageTitle, Pill, SERVICE_LABEL, StatusBadge, VEHICLE_LABEL, BUSINESS_LABEL, dt } from "@/components/ui";
+import { Card, Initials, PageTitle, Pill, SERVICE_LABEL, StatusBadge, VEHICLE_LABEL, BUSINESS_LABEL, STATUS_LABEL, KIND_LABEL, dt } from "@/components/ui";
+import ExportButton from "@/components/ExportButton";
 import { getQueue, type Provider } from "@/lib/admin-api";
 
 const STATUSES = [
@@ -43,13 +44,37 @@ export default function ProvidersPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (list ?? []).filter(
-      (p) => !q || p.display_name.toLowerCase().includes(q) || p.phone.includes(q) || p.vehicle?.plate.toLowerCase().includes(q) || p.business?.registration_number.toLowerCase().includes(q),
+      (p) => !q || (p.display_name ?? "").toLowerCase().includes(q) || (p.phone ?? "").includes(q) || (p.vehicle?.plate ?? "").toLowerCase().includes(q) || (p.business?.registration_number ?? "").toLowerCase().includes(q),
     );
   }, [list, query]);
 
   return (
     <AdminShell>
-      <PageTitle title="Vérifications" subtitle="Les riders et prestataires ne sont visibles par les clients qu'après approbation." />
+      <PageTitle
+        title="Vérifications"
+        subtitle="Les riders et prestataires ne sont visibles par les clients qu'après approbation."
+        action={
+          <ExportButton
+            name="gobert-prestataires"
+            rows={filtered}
+            columns={[
+              { label: "Nom", value: (p) => p.display_name },
+              { label: "Type", value: (p) => KIND_LABEL[p.kind] ?? p.kind },
+              { label: "Statut", value: (p) => STATUS_LABEL[p.verification_status] ?? p.verification_status },
+              { label: "Téléphone", value: (p) => p.phone },
+              { label: "Ville", value: (p) => p.city },
+              { label: "Services", value: (p) => (p.services ?? []).join(", ") },
+              { label: "Véhicule", value: (p) => (p.vehicle ? `${p.vehicle.brand} ${p.vehicle.model} ${p.vehicle.plate}`.trim() : "") },
+              { label: "Entreprise", value: (p) => p.business?.name },
+              { label: "N° RCCM", value: (p) => p.business?.registration_number },
+              { label: "Note", value: (p) => p.rating_avg },
+              { label: "Courses", value: (p) => p.trips_completed },
+              { label: "Soumis le", value: (p) => p.submitted_at },
+              { label: "Décidé le", value: (p) => p.reviewed_at },
+            ]}
+          />
+        }
+      />
 
       <div className="flex flex-wrap gap-2">
         {KINDS.map((k) => (

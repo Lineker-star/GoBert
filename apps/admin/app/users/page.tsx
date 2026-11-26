@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import AdminShell from "@/components/AdminShell";
 import { Card, Initials, PageTitle, Pill, ROLE_LABEL, StatusBadge, dt } from "@/components/ui";
+import ExportButton from "@/components/ExportButton";
 import { blockUser, getUsers, type User } from "@/lib/admin-api";
 
 const ROLES = [
@@ -25,12 +26,31 @@ export default function UsersPage() {
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return (users ?? []).filter((u) => !q || u.full_name.toLowerCase().includes(q) || u.phone.includes(q) || (u.email ?? "").toLowerCase().includes(q));
+    return (users ?? []).filter((u) => !q || u.full_name.toLowerCase().includes(q) || (u.phone ?? "").includes(q) || (u.email ?? "").toLowerCase().includes(q));
   }, [users, query]);
 
   return (
     <AdminShell>
-      <PageTitle title="Utilisateurs" subtitle="Comptes inscrits, avec leur type choisi à l'inscription." />
+      <PageTitle
+        title="Utilisateurs"
+        subtitle="Comptes inscrits, avec leur type choisi à l'inscription."
+        action={
+          <ExportButton
+            name="gobert-utilisateurs"
+            rows={list}
+            columns={[
+              { label: "Nom", value: (u) => u.full_name },
+              { label: "Type", value: (u) => ROLE_LABEL[u.role] ?? u.role },
+              { label: "Téléphone", value: (u) => u.phone },
+              { label: "E-mail", value: (u) => u.email },
+              { label: "Ville", value: (u) => u.city },
+              { label: "Vérification", value: (u) => u.verification_status },
+              { label: "Bloqué", value: (u) => (u.is_blocked ? "oui" : "non") },
+              { label: "Inscrit le", value: (u) => u.created_at },
+            ]}
+          />
+        }
+      />
       <div className="flex flex-wrap items-center gap-2">
         {ROLES.map((r) => (
           <Pill key={r.key} active={role === r.key} onClick={() => setRole(r.key)}>

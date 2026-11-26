@@ -12,7 +12,7 @@ import { RIDER_SERVICES, PRIMARY_SERVICE, BUSINESS_PRIMARY, RIDER_DOCS, BUSINESS
 // Types
 // ---------------------------------------------------------------------------
 
-export type UserRole = "customer" | "rider" | "business";
+export type UserRole = "customer" | "rider" | "business" | "admin";
 export type ProviderKind = "rider" | "business";
 export type VehicleType = "moto" | "taxi" | "tricycle" | "truck" | "car_rental";
 export type ServiceKey = "moto" | "ride" | "express" | "cargo" | "rent" | "logistics";
@@ -1272,6 +1272,43 @@ export function getOverview() {
     rentals_open: store.rentalRequests.filter((r) => r.status === "requested").length,
     parcels_open: store.parcels.filter((p) => p.status !== "delivered" && p.status !== "cancelled").length,
   };
+}
+
+export type DayStat = {
+  day: string;
+  trips: number;
+  completed: number;
+  cancelled: number;
+  revenue_xaf: number;
+  rentals: number;
+  parcels: number;
+  signups: number;
+  applications: number;
+};
+
+/** Daily figures for the admin trend charts (same shape as the admin_stats() RPC). */
+export function getStats(days = 14): DayStat[] {
+  tick();
+  const n = Math.min(Math.max(Math.round(days) || 14, 1), 90);
+  const out: DayStat[] = [];
+  const dayOf = (iso: string | null | undefined) => (iso ? iso.slice(0, 10) : "");
+  for (let i = n - 1; i >= 0; i--) {
+    const day = new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10);
+    const trips = store.bookings.filter((b) => dayOf(b.created_at) === day);
+    const done = trips.filter((b) => b.status === "completed");
+    out.push({
+      day,
+      trips: trips.length,
+      completed: done.length,
+      cancelled: trips.filter((b) => b.status === "cancelled" || b.status === "expired").length,
+      revenue_xaf: done.reduce((sum, b) => sum + (b.fare_final_xaf ?? b.fare_estimate_xaf ?? 0), 0),
+      rentals: store.rentalRequests.filter((r) => dayOf(r.created_at) === day).length,
+      parcels: store.parcels.filter((x) => dayOf(x.created_at) === day).length,
+      signups: store.users.filter((u) => dayOf(u.created_at) === day).length,
+      applications: store.providers.filter((x) => dayOf(x.submitted_at) === day).length,
+    });
+  }
+  return out;
 }
 
 export function getAuditLog(): AuditEntry[] {

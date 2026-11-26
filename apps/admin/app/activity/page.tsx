@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
 import { Card, PAYMENT_LABEL, PageTitle, Pill, StatusBadge, VEHICLE_LABEL, dt, fcfa } from "@/components/ui";
+import ExportButton from "@/components/ExportButton";
 import { cancelTrip, getActivity, type Activity } from "@/lib/admin-api";
 
 type Tab = "bookings" | "rentals" | "parcels";
@@ -24,7 +25,62 @@ export default function ActivityPage() {
 
   return (
     <AdminShell>
-      <PageTitle title="Activité" subtitle="Courses, locations et livraisons (200 plus récentes, rafraîchies toutes les 10 s)." />
+      <PageTitle
+        title="Activité"
+        subtitle="Courses, locations et livraisons (200 plus récentes, rafraîchies toutes les 10 s)."
+        action={
+          tab === "bookings" ? (
+            <ExportButton
+              name="gobert-courses"
+              rows={data?.bookings}
+              columns={[
+                { label: "Date", value: (b) => b.created_at },
+                { label: "Statut", value: (b) => b.status },
+                { label: "Véhicule", value: (b) => VEHICLE_LABEL[b.vehicle_type] ?? b.vehicle_type },
+                { label: "Départ", value: (b) => b.pickup?.label },
+                { label: "Arrivée", value: (b) => b.dropoff?.label },
+                { label: "Client", value: (b) => b.passenger_name },
+                { label: "Rider", value: (b) => b.provider_name },
+                { label: "Prix estimé (FCFA)", value: (b) => b.fare_estimate_xaf },
+                { label: "Prix final (FCFA)", value: (b) => b.fare_final_xaf },
+                { label: "Paiement", value: (b) => PAYMENT_LABEL[b.payment_method] ?? b.payment_method },
+                { label: "Note", value: (b) => b.rating },
+              ]}
+            />
+          ) : tab === "rentals" ? (
+            <ExportButton
+              name="gobert-locations"
+              rows={data?.rentals}
+              columns={[
+                { label: "Date", value: (r) => r.created_at },
+                { label: "Statut", value: (r) => r.status },
+                { label: "Véhicule", value: (r) => r.vehicle_label },
+                { label: "Client", value: (r) => r.customer_name },
+                { label: "Prestataire", value: (r) => r.provider_name },
+                { label: "Du", value: (r) => r.start_date },
+                { label: "Au", value: (r) => r.end_date },
+                { label: "Total (FCFA)", value: (r) => r.total_xaf },
+              ]}
+            />
+          ) : (
+            <ExportButton
+              name="gobert-colis"
+              rows={data?.parcels}
+              columns={[
+                { label: "Date", value: (p) => p.created_at },
+                { label: "Statut", value: (p) => p.status },
+                { label: "Expéditeur", value: (p) => p.sender_name },
+                { label: "Destinataire", value: (p) => p.receiver_name },
+                { label: "Départ", value: (p) => p.pickup?.label },
+                { label: "Arrivée", value: (p) => p.dropoff?.label },
+                { label: "Taille", value: (p) => p.size },
+                { label: "Prix (FCFA)", value: (p) => p.fare_xaf },
+                { label: "Coursier", value: (p) => p.provider_name },
+              ]}
+            />
+          )
+        }
+      />
       <div className="flex flex-wrap gap-2">
         <Pill active={tab === "bookings"} onClick={() => setTab("bookings")}>
           Courses {data ? `(${data.bookings.length})` : ""}
