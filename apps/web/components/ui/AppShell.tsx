@@ -214,9 +214,17 @@ export default function AppShell({
   const locale = useLocale();
   const pathname = usePathname() ?? "";
   const t = useTranslations();
-  const { session, profile, isAnonymous } = useAuth();
+  const { session, profile, isAnonymous, loading, profileLoading } = useAuth();
+  const router = useRouter();
   const nav = useNav();
   const rel = pathname.replace(/^\/(fr|en)/, "") || "";
+
+  // Signed in (e.g. after clicking the email confirmation link) but sign-up not finished:
+  // send the user to the profile step on every page, not only on protected ones.
+  const needsProfile = !loading && !profileLoading && !!session && !isAnonymous && !profile;
+  useEffect(() => {
+    if (needsProfile) router.replace(`/${locale}/auth?step=profile`);
+  }, [needsProfile, router, locale]);
   const isActive = (item: NavItem) => (item.match ?? [item.href]).some((m) => (m === "" ? rel === "" : rel === m || rel.startsWith(`${m}/`)));
   const mobileNav = nav.filter((n) => n.mobile).slice(0, 5);
 
