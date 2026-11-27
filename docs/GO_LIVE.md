@@ -7,7 +7,9 @@
 - [x] Auth pushed with `supabase config push`: anonymous sign-ins, phone sign-up, 8-char letters+digits passwords, 60 s SMS throttle, /auth redirect URLs. Email confirmation and TOTP were already on.
 - [x] Both apps on the live database (`NEXT_PUBLIC_USE_MOCKS=false`); admin served only under the secret `ADMIN_BASE_PATH` in apps/admin/.env.local.
 - [x] `supabase/tests/e2e_rollback.sql`: 41/41 checks on the live DB (always rolls back). `apps/web/scripts/shoot-live.mjs`: 14/14 live UI checks.
-- [ ] SMS provider credentials (Twilio/Vonage) — Dashboard → Authentication → Phone.
+- [ ] SMS: free Android gateway hook deployed (`send-sms-hook`); needs SMSGATE_USERNAME / SMSGATE_PASSWORD / SEND_SMS_HOOK_SECRET secrets + Auth Hooks → Send SMS.
+- [x] Cloudflare Turnstile in both apps (site key in Vercel env). [ ] Final switch: Supabase → Attack Protection → CAPTCHA → Turnstile secret key.
+- [x] Custom SMTP (Brevo, noreply@gobert.online) and GoBert-branded auth emails.
 - [ ] Custom SMTP for email (built-in Supabase email is rate-limited and meant for testing).
 - [x] First admin account: `tanglineker@gmail.com` (role admin; 2FA is set up on first admin login).
 - [x] `202611260005_admin_stats.sql` applied (fixed a date generate_series bug; checked: refused without 2FA, 14 days returned with 2FA).
