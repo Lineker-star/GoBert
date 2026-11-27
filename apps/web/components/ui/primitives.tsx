@@ -172,14 +172,17 @@ export function Field({
   );
 }
 
+/** A page-supplied width (w-…, flex-…) replaces the default full width instead of fighting it. */
+const width = (className?: string) => (className && /(^|\s)(w-|flex-1|basis-)/.test(className) ? "" : "w-full");
+
 const inputBase =
-  "w-full rounded-xl border border-grey bg-white px-3.5 text-[15px] text-charcoal placeholder:text-charcoal/35 transition focus:outline-none focus:border-green focus:ring-4 focus:ring-green/10 disabled:bg-grey/40";
+  "rounded-xl border border-grey bg-white px-3.5 text-[15px] text-charcoal placeholder:text-charcoal/35 transition focus:outline-none focus:border-green focus:ring-4 focus:ring-green/10 disabled:bg-grey/40";
 
 export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(function Input(
   { className, ...rest },
   ref,
 ) {
-  return <input ref={ref} className={cx(inputBase, "h-12", className)} {...rest} />;
+  return <input ref={ref} className={cx(inputBase, width(className), "h-12", className)} {...rest} />;
 });
 
 export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(function Select(
@@ -187,7 +190,7 @@ export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<H
   ref,
 ) {
   return (
-    <select ref={ref} className={cx(inputBase, "h-12 pr-8", className)} {...rest}>
+    <select ref={ref} className={cx(inputBase, width(className), "h-12 pr-8", className)} {...rest}>
       {children}
     </select>
   );
@@ -197,7 +200,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttrib
   { className, ...rest },
   ref,
 ) {
-  return <textarea ref={ref} className={cx(inputBase, "py-3 min-h-[88px]", className)} {...rest} />;
+  return <textarea ref={ref} className={cx(inputBase, width(className), "py-3 min-h-[88px]", className)} {...rest} />;
 });
 
 /** Pill-style single choice. Selected = solid green with white text. */
