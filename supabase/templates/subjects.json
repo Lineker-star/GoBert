@@ -1,0 +1,8 @@
+{
+  "confirmation": "Confirmez votre compte GoBert · Confirm your GoBert account",
+  "magic_link": "Votre lien de connexion GoBert · Your GoBert sign-in link",
+  "recovery": "Réinitialisez votre mot de passe GoBert · Reset your GoBert password",
+  "email_change": "Confirmez votre nouvelle adresse · Confirm your new email",
+  "invite": "Vous êtes invité sur GoBert · You're invited to GoBert",
+  "reauthentication": "Votre code de sécurité GoBert · Your GoBert security code"
+}
