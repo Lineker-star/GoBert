@@ -10,9 +10,9 @@
 - [ ] SMS provider credentials (Twilio/Vonage) — Dashboard → Authentication → Phone.
 - [ ] Custom SMTP for email (built-in Supabase email is rate-limited and meant for testing).
 - [x] First admin account: `tanglineker@gmail.com` (role admin; 2FA is set up on first admin login).
-- [ ] Apply `202611260005_admin_stats.sql` (admin trend charts; the CLI lost access to the project before it could be applied).
+- [x] `202611260005_admin_stats.sql` applied (fixed a date generate_series bug; checked: refused without 2FA, 14 days returned with 2FA).
 - [x] Deployed on Vercel: web <https://gobert-lyart.vercel.app>, admin on `gobert-ops.vercel.app` under the secret path (12/12 live checks).
-- [ ] Supabase Site URL / redirect URLs → `https://gobert-lyart.vercel.app` (already in `supabase/config.toml`; needs `supabase config push` or the dashboard).
+- [x] Supabase Site URL / redirect URLs point to https://gobert-lyart.vercel.app (config.toml matches the project: no differences).
 
 The app runs on the in-memory demo backend while `NEXT_PUBLIC_USE_MOCKS=true`.
 These steps switch it to the real Supabase project (`dpziqhptuvjqbikrvcju`).
@@ -50,6 +50,18 @@ fixes two privilege-escalation holes in the original policies
    ```
 3. Open the admin console at its secret URL, sign in, scan the QR code with an
    authenticator app. Admin powers only work after this 2FA step.
+
+### Lost authenticator app (reset an admin's 2FA)
+
+The login page only shows a QR code while the account has **no verified** authenticator.
+To start over (new phone, deleted app entry), run in the SQL editor:
+
+```sql
+delete from auth.mfa_factors
+where user_id = (select id from auth.users where email = 'admin@example.cm');
+```
+
+The next sign-in shows a fresh QR code.
 
 ## 4. Environment variables
 

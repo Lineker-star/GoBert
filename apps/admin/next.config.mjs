@@ -40,6 +40,8 @@ const csp = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // No Next.js "N" badge in the corner while developing.
+  devIndicators: false,
   // This app has its own lockfile; don't let Next guess the monorepo root.
   outputFileTracingRoot: fileURLToPath(new URL(".", import.meta.url)),
   basePath: basePath || undefined,

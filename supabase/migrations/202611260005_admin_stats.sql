@@ -18,7 +18,7 @@ begin
              'parcels', coalesce(pa.n, 0),
              'signups', coalesce(s.n, 0),
              'applications', coalesce(ap.n, 0)) order by d.day)
-    from (select generate_series(first_day, first_day + (n - 1), 1) as day) d
+    from (select first_day + i as day from generate_series(0, n - 1) as i) d
     left join (
       select (created_at at time zone 'Africa/Douala')::date as day,
              count(*) as trips,

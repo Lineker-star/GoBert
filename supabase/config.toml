@@ -163,7 +163,7 @@ site_url = "https://gobert-lyart.vercel.app"
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 # Magic links, email confirmation and password reset land on /<locale>/auth. Add your production domain here.
-additional_redirect_urls = ["https://gobert-lyart.vercel.app/**", "https://*-megajtechnologies-3208s-projects.vercel.app/**", "http://localhost:3000/**"]
+additional_redirect_urls = ["http://localhost:3000/fr/auth", "http://localhost:3000/en/auth", "http://localhost:3000/**", "https://gobert-lyart.vercel.app/**", "https://*-megajtechnologies-3208s-projects.vercel.app/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.

@@ -11,6 +11,18 @@ const MAX_ATTEMPTS = 5;
 const LOCK_MS = 60_000;
 
 /**
+ * supabase-js returns the QR code as `data:image/svg+xml;utf-8,<svg …>` with the SVG
+ * not URL-encoded. A "#" (colour) or "%" in the markup then truncates the URL and the
+ * image renders empty, so re-encode it.
+ */
+function qrDataUrl(raw: string): string {
+  if (!raw) return raw;
+  const svg = raw.startsWith("<") ? raw : raw.replace(/^data:image\/svg\+xml;(?:utf-8|charset=utf-8),/i, "");
+  if (!svg.trimStart().startsWith("<")) return raw; // already base64 / encoded
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+/**
  * Admin sign-in: email + password, then a 6-digit code from an authenticator app
  * (Supabase TOTP). First-time admins enrol by scanning a QR code. Finally the
  * database must confirm the admin role for this aal2 session.
@@ -62,7 +74,7 @@ export default function LoginPage() {
     const { data: en, error: enErr } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: `GoBert Admin ${new Date().toISOString().slice(0, 10)}` });
     if (enErr) return setError(enErr.message);
     setFactorId(en.id);
-    setQr(en.totp.qr_code);
+    setQr(qrDataUrl(en.totp.qr_code));
     setSecret(en.totp.secret);
     setStep("enroll");
   }
@@ -180,6 +192,9 @@ export default function LoginPage() {
                   <ShieldCheck className="w-5 h-5 text-green" /> Vérification 2FA
                 </h1>
                 <p className="mt-1 text-sm text-charcoal/55">Étape 2 sur 2 — saisissez le code de votre application d&apos;authentification.</p>
+                <p className="mt-2 rounded-xl bg-ivory px-3 py-2 text-xs text-charcoal/60">
+                  Ce compte a déjà une application d&apos;authentification enregistrée (entrée « GoBert » dans Google Authenticator, Authy…), donc aucun QR code n&apos;est affiché. Application perdue ? Un autre administrateur, ou le propriétaire de la base Supabase, doit réinitialiser la 2FA de ce compte ; un nouveau QR code apparaîtra à la connexion suivante.
+                </p>
               </div>
               <input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="••••••" className={`${input} h-16 text-center text-3xl tracking-[0.5em] font-bold`} autoFocus />
               {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
