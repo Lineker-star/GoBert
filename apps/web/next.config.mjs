@@ -18,11 +18,12 @@ const sb = supabaseHost ? `https://${supabaseHost} wss://${supabaseHost}` : "";
 // Content-Security-Policy: only the services the app really uses.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
+  "frame-src https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://i.pravatar.cc ${supabaseHost ? `https://${supabaseHost}` : ""}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${sb} https://router.project-osrm.org https://nominatim.openstreetmap.org https://photon.komoot.io https://tile.openstreetmap.org${isDev ? " ws: http://localhost:*" : ""}`,
+  `connect-src 'self' ${sb} https://router.project-osrm.org https://nominatim.openstreetmap.org https://photon.komoot.io https://tile.openstreetmap.org https://challenges.cloudflare.com${isDev ? " ws: http://localhost:*" : ""}`,
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "frame-ancestors 'none'",

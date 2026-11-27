@@ -75,7 +75,11 @@ export default function ExpressPage() {
     setError(null);
     try {
       let uid = user?.id ?? null;
-      if (!session) uid = (await signInAnonymous()).userId ?? null;
+      if (!session) {
+        const g = await signInAnonymous();
+        if (g.error) throw new Error(g.error);
+        uid = g.userId ?? null;
+      }
       const p = await createParcel({
         sender_user_id: uid,
         sender_name: senderName.trim(),
@@ -91,8 +95,8 @@ export default function ExpressPage() {
       setParcel(p);
       setParcelId(p.id);
       window.history.replaceState(null, "", `/${locale}/express?id=${p.id}`);
-    } catch {
-      setError(t("common.networkError"));
+    } catch (e) {
+      setError(e instanceof Error && e.message === "captcha_failed" ? t("auth.errors.captcha_failed") : t("common.networkError"));
     } finally {
       setBusy(false);
     }

@@ -5,6 +5,17 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { KeyRound, Loader2, Lock, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { supabase, USE_MOCKS, checkAdminSession, adminSignOut } from "@/lib/supabase";
+import { captchaEnabled, getCaptchaToken } from "@/lib/captcha";
+
+/** Turnstile token, or "failed" when the bot check did not pass. */
+async function captchaToken(): Promise<string | undefined | "failed"> {
+  if (!captchaEnabled) return undefined;
+  try {
+    return await getCaptchaToken();
+  } catch {
+    return "failed";
+  }
+}
 
 type Step = "password" | "enroll" | "verify" | "recover";
 const MAX_ATTEMPTS = 5;
@@ -52,7 +63,12 @@ export default function LoginPage() {
     const addr = (data.session?.user.email ?? email).trim().toLowerCase();
     if (!addr) return setError("Saisissez d'abord votre e-mail d'administrateur.");
     setBusy(true);
-    const { error: err } = await supabase.auth.signInWithOtp({ email: addr, options: { shouldCreateUser: false } });
+    const cap = await captchaToken();
+    if (cap === "failed") {
+      setBusy(false);
+      return setError("La vérification anti-robot a échoué. Rechargez la page.");
+    }
+    const { error: err } = await supabase.auth.signInWithOtp({ email: addr, options: { shouldCreateUser: false, captchaToken: cap } });
     setBusy(false);
     if (err) return setError(/rate|security purposes/i.test(err.message) ? "Patientez une minute avant de redemander un code." : "Impossible d'envoyer le code. Réessayez.");
     setRecoveryEmail(addr);
@@ -140,7 +156,12 @@ export default function LoginPage() {
       sessionStorage.setItem("gobert:admin-mock", "1");
       return router.replace("/overview");
     }
-    const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+    const cap = await captchaToken();
+    if (cap === "failed") {
+      setBusy(false);
+      return setError("La vérification anti-robot a échoué. Rechargez la page.");
+    }
+    const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password, options: { captchaToken: cap } });
     if (err) {
       setBusy(false);
       return fail("Identifiants invalides.");

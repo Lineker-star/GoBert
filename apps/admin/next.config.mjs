@@ -25,11 +25,12 @@ const supabaseHost = (() => {
 
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isProd ? "" : " 'unsafe-eval'"}`,
+  "frame-src https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob:${supabaseHost ? ` https://${supabaseHost}` : ""}`,
   "font-src 'self' data:",
-  `connect-src 'self'${supabaseHost ? ` https://${supabaseHost} wss://${supabaseHost}` : ""}${isProd ? "" : " http://localhost:* ws:"}`,
+  `connect-src 'self' https://challenges.cloudflare.com${supabaseHost ? ` https://${supabaseHost} wss://${supabaseHost}` : ""}${isProd ? "" : " http://localhost:* ws:"}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

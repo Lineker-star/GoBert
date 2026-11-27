@@ -81,7 +81,11 @@ export default function RentPage() {
     setError(null);
     try {
       let uid = user?.id ?? null;
-      if (!session) uid = (await signInAnonymous()).userId ?? null;
+      if (!session) {
+        const g = await signInAnonymous();
+        if (g.error) throw new Error(g.error);
+        uid = g.userId ?? null;
+      }
       const r = await createRentalRequest({
         vehicle_id: selected.id,
         customer_user_id: uid,
@@ -94,7 +98,7 @@ export default function RentPage() {
       setRequest(r);
       setSelected(null);
     } catch (e) {
-      setError(e instanceof ApiError && e.status === 409 ? t("rent.unavailable") : t("common.networkError"));
+      setError(e instanceof ApiError && e.status === 409 ? t("rent.unavailable") : e instanceof Error && e.message === "captcha_failed" ? t("auth.errors.captcha_failed") : t("common.networkError"));
     } finally {
       setBusy(false);
     }

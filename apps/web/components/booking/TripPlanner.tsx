@@ -163,7 +163,7 @@ export default function TripPlanner() {
       router.push(`/${locale}/booking?id=${b.id}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
-      setError(msg === "queued" ? t("booking.queued") : msg === "anonymous_disabled" ? t("auth.errors.anonymous_disabled") : t("common.networkError"));
+      setError(msg === "queued" ? t("booking.queued") : msg === "anonymous_disabled" || msg === "captcha_failed" ? t(`auth.errors.${msg}`) : t("common.networkError"));
       setBooking(false);
     }
   };

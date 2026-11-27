@@ -102,6 +102,7 @@ export default function BookingPage() {
       if (!session) {
         // Anonymous booking is allowed: create a guest session on the fly.
         const res = await signInAnonymous();
+        if (res.error) throw new Error(res.error);
         passengerId = res.userId;
       }
       const b = await createBooking({
@@ -117,7 +118,7 @@ export default function BookingPage() {
       setBookingId(b.id);
       router.replace(`/${locale}/booking?id=${b.id}`);
     } catch (e) {
-      setCreateError(e instanceof Error && e.message === "queued" ? t("booking.queued") : t("common.networkError"));
+      setCreateError(e instanceof Error && e.message === "queued" ? t("booking.queued") : e instanceof Error && e.message === "captcha_failed" ? t("auth.errors.captcha_failed") : t("common.networkError"));
     } finally {
       setCreating(false);
     }

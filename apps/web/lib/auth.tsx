@@ -4,6 +4,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { ApiError, getUser, registerUser, updateUser } from "./api";
 import * as sb from "./sb-api";
+import { captchaEnabled, getCaptchaToken } from "./captcha";
 import type { MockUser, UserRole } from "./mock-store";
 
 const USE_MOCKS = typeof process !== "undefined" && process.env.NEXT_PUBLIC_USE_MOCKS === "true";
@@ -49,6 +50,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 function friendlyError(message: string | undefined, fallback = "generic"): string {
   if (!message) return fallback;
   const m = message.toLowerCase();
+  if (m.includes("captcha")) return "captcha_failed";
   if (m.includes("rate") || m.includes("too many") || m.includes("security purposes")) return "rate_limited";
   if (m.includes("invalid login") || m.includes("invalid credentials")) return "invalid_credentials";
   if (m.includes("already registered") || m.includes("already exists")) return "already_registered";
@@ -102,6 +104,16 @@ function writeStored(s: StoredSession | null) {
     else localStorage.removeItem(SESSION_KEY);
   } catch {
     // storage unavailable — session lives in memory only
+  }
+}
+
+/** Turnstile token for Supabase Auth; null means the bot check failed (when enabled). */
+async function captcha(): Promise<{ token?: string; failed: boolean }> {
+  if (!captchaEnabled) return { failed: false };
+  try {
+    return { token: await getCaptchaToken(), failed: false };
+  } catch {
+    return { failed: true };
   }
 }
 
@@ -191,7 +203,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ------------------------------------------------ phone + SMS code
   const signInWithPhone = useCallback(async (phone: string): Promise<AuthResult> => {
     if (USE_MOCKS) return { error: null };
-    const { error } = await supabase.auth.signInWithOtp({ phone });
+    const c = await captcha();
+    if (c.failed) return { error: "captcha_failed" };
+    const { error } = await supabase.auth.signInWithOtp({ phone, options: { captchaToken: c.token } });
     return { error: error ? friendlyError(error.message) : null };
   }, []);
 
@@ -218,9 +232,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { ...r, needsConfirmation: null };
       }
       const code = await guestCode();
+      const cap = await captcha();
+      if (cap.failed) return { error: "captcha_failed", needsConfirmation: null };
       const { data, error } = c.email
-        ? await supabase.auth.signUp({ email: c.email, password: c.password, options: { emailRedirectTo: c.redirectTo ?? `${window.location.origin}${window.location.pathname}` } })
-        : await supabase.auth.signUp({ phone: c.phone!, password: c.password });
+        ? await supabase.auth.signUp({
+            email: c.email,
+            password: c.password,
+            options: { emailRedirectTo: c.redirectTo ?? `${window.location.origin}${window.location.pathname}`, captchaToken: cap.token },
+          })
+        : await supabase.auth.signUp({ phone: c.phone!, password: c.password, options: { captchaToken: cap.token } });
       if (error) return { error: friendlyError(error.message), needsConfirmation: null };
       if (!data.session) return { error: null, needsConfirmation: c.email ? "email" : "sms" };
       const r = await afterSignIn(data.session, code);
@@ -234,9 +254,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!c.password) return { error: "invalid_credentials", hasProfile: false, role: null };
       if (USE_MOCKS) return mockSignIn(c.email ?? c.phone ?? "", { phone: c.phone, email: c.email });
       const code = await guestCode();
+      const cap = await captcha();
+      if (cap.failed) return { error: "captcha_failed", hasProfile: false, role: null };
       const { data, error } = c.email
-        ? await supabase.auth.signInWithPassword({ email: c.email, password: c.password })
-        : await supabase.auth.signInWithPassword({ phone: c.phone!, password: c.password });
+        ? await supabase.auth.signInWithPassword({ email: c.email, password: c.password, options: { captchaToken: cap.token } })
+        : await supabase.auth.signInWithPassword({ phone: c.phone!, password: c.password, options: { captchaToken: cap.token } });
       if (error) return { error: friendlyError(error.message), hasProfile: false, role: null };
       return afterSignIn(data.session, code);
     },
@@ -246,13 +268,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ------------------------------------------------ email magic link
   const sendMagicLink = useCallback(async (email: string, redirectTo: string): Promise<AuthResult> => {
     if (USE_MOCKS) return { error: null };
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo, shouldCreateUser: true } });
+    const c = await captcha();
+    if (c.failed) return { error: "captcha_failed" };
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo, shouldCreateUser: true, captchaToken: c.token } });
     return { error: error ? friendlyError(error.message) : null };
   }, []);
 
   const requestPasswordReset = useCallback(async (email: string, redirectTo: string): Promise<AuthResult> => {
     if (USE_MOCKS) return { error: null };
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    const c = await captcha();
+    if (c.failed) return { error: "captcha_failed" };
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo, captchaToken: c.token });
     return { error: error ? friendlyError(error.message) : null };
   }, []);
 
@@ -265,7 +291,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
       return { error: null, userId: stored.id };
     }
-    const { data, error } = await supabase.auth.signInAnonymously();
+    const c = await captcha();
+    if (c.failed) return { error: "captcha_failed" };
+    const { data, error } = await supabase.auth.signInAnonymously({ options: { captchaToken: c.token } });
     if (error) return { error: friendlyError(error.message) };
     setSession(data.session);
     return { error: null, userId: data.user?.id };

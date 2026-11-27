@@ -345,7 +345,8 @@
       "phone_not_confirmed": "Confirm your phone number first with the SMS code.",
       "weak_password": "The password needs at least 8 characters, including letters and digits.",
       "blocked": "This account is blocked. Contact GoBert support.",
-      "method_disabled": "This sign-in method is not available yet. Try another one."
+      "method_disabled": "This sign-in method is not available yet. Try another one.",
+      "captcha_failed": "The anti-bot check failed. Reload the page and try again."
     },
     "methodLabel": "Sign-in method",
     "methods": {
