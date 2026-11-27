@@ -53,15 +53,18 @@ fixes two privilege-escalation holes in the original policies
 
 ### Lost authenticator app (reset an admin's 2FA)
 
-The login page only shows a QR code while the account has **no verified** authenticator.
-To start over (new phone, deleted app entry), run in the SQL editor:
+Self-service, on the admin login page: after the password, click
+**"Application perdue ou nouveau téléphone ? Afficher un nouveau QR code"**. A one-time code is
+emailed to the admin address; entering it removes the old authenticator
+(`admin_reset_own_mfa()`, migration 0006, only within 15 min of an email-code sign-in and only
+for role admin; audited) and shows a fresh QR code.
+
+Manual fallback in the SQL editor:
 
 ```sql
 delete from auth.mfa_factors
 where user_id = (select id from auth.users where email = 'admin@example.cm');
 ```
-
-The next sign-in shows a fresh QR code.
 
 ## 4. Environment variables
 

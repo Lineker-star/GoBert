@@ -3,10 +3,10 @@ import { asset } from "@/lib/asset";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { KeyRound, Loader2, Lock, ShieldCheck, Smartphone } from "lucide-react";
+import { KeyRound, Loader2, Lock, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { supabase, USE_MOCKS, checkAdminSession, adminSignOut } from "@/lib/supabase";
 
-type Step = "password" | "enroll" | "verify";
+type Step = "password" | "enroll" | "verify" | "recover";
 const MAX_ATTEMPTS = 5;
 const LOCK_MS = 60_000;
 
@@ -40,6 +40,51 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(0);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
+
+  /** Lost authenticator: email a one-time code to the admin address. */
+  async function startRecovery() {
+    setError(null);
+    setNotice(null);
+    const { data } = await supabase.auth.getSession();
+    const addr = (data.session?.user.email ?? email).trim().toLowerCase();
+    if (!addr) return setError("Saisissez d'abord votre e-mail d'administrateur.");
+    setBusy(true);
+    const { error: err } = await supabase.auth.signInWithOtp({ email: addr, options: { shouldCreateUser: false } });
+    setBusy(false);
+    if (err) return setError(/rate|security purposes/i.test(err.message) ? "Patientez une minute avant de redemander un code." : "Impossible d'envoyer le code. Réessayez.");
+    setRecoveryEmail(addr);
+    setEmailCode("");
+    setNotice(`Code envoyé à ${addr}. Il est valable quelques minutes.`);
+    setStep("recover");
+  }
+
+  /** Email code → fresh session → database removes the old authenticator → new QR code. */
+  const submitRecovery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{6,10}$/.test(emailCode)) return setError("Saisissez le code reçu par e-mail.");
+    if (Date.now() < lockedUntil) return setError("Trop de tentatives. Réessayez dans une minute.");
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase.auth.verifyOtp({ email: recoveryEmail, token: emailCode, type: "email" });
+    if (err) {
+      setBusy(false);
+      return fail("Code incorrect ou expiré.");
+    }
+    const { error: resetErr } = await supabase.rpc("admin_reset_own_mfa");
+    if (resetErr) {
+      setBusy(false);
+      await adminSignOut();
+      setStep("password");
+      return setError("Réinitialisation refusée : ce compte n'est pas administrateur.");
+    }
+    setNotice("Ancienne application d'authentification supprimée. Scannez le nouveau QR code.");
+    setCode("");
+    await prepareMfa();
+    setBusy(false);
+  };
 
   // Resume: already past password but not 2FA?
   useEffect(() => {
@@ -168,6 +213,7 @@ export default function LoginPage() {
                 </h1>
                 <p className="mt-1 text-sm text-charcoal/55">Scannez ce QR code avec Google Authenticator, Microsoft Authenticator ou Authy, puis saisissez le code affiché.</p>
               </div>
+              {notice && <p className="rounded-xl bg-green/10 px-3 py-2 text-sm text-green">{notice}</p>}
               {qr && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={qr} alt="QR code 2FA" className="mx-auto h-52 w-52 rounded-xl border border-grey bg-white p-2" />
@@ -193,13 +239,21 @@ export default function LoginPage() {
                 </h1>
                 <p className="mt-1 text-sm text-charcoal/55">Étape 2 sur 2 — saisissez le code de votre application d&apos;authentification.</p>
                 <p className="mt-2 rounded-xl bg-ivory px-3 py-2 text-xs text-charcoal/60">
-                  Ce compte a déjà une application d&apos;authentification enregistrée (entrée « GoBert » dans Google Authenticator, Authy…), donc aucun QR code n&apos;est affiché. Application perdue ? Un autre administrateur, ou le propriétaire de la base Supabase, doit réinitialiser la 2FA de ce compte ; un nouveau QR code apparaîtra à la connexion suivante.
+                  Votre application d&apos;authentification est déjà configurée : ouvrez l&apos;entrée « GoBert » (Google Authenticator, Authy…) et saisissez son code. Le QR code n&apos;apparaît qu&apos;à la première configuration.
                 </p>
               </div>
               <input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="••••••" className={`${input} h-16 text-center text-3xl tracking-[0.5em] font-bold`} autoFocus />
               {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
               <button type="submit" disabled={busy || code.length !== 6} className={button}>
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} Vérifier
+              </button>
+              <button
+                type="button"
+                onClick={startRecovery}
+                disabled={busy}
+                className="w-full rounded-xl border border-grey bg-white py-2.5 text-sm font-semibold text-green hover:border-green/40 disabled:opacity-50"
+              >
+                Application perdue ou nouveau téléphone ? Afficher un nouveau QR code
               </button>
               <button
                 type="button"
@@ -211,6 +265,49 @@ export default function LoginPage() {
               >
                 Annuler
               </button>
+            </form>
+          )}
+
+          {step === "recover" && (
+            <form onSubmit={submitRecovery} className="space-y-4">
+              <div>
+                <h1 className="flex items-center gap-2 text-2xl font-extrabold">
+                  <Mail className="w-5 h-5 text-green" /> Nouveau QR code
+                </h1>
+                <p className="mt-1 text-sm text-charcoal/55">
+                  Pour prouver que c&apos;est bien vous, saisissez le code envoyé à <strong>{recoveryEmail}</strong> (e-mail « Votre lien de connexion GoBert »). L&apos;ancienne entrée de l&apos;application d&apos;authentification sera remplacée.
+                </p>
+              </div>
+              {notice && <p className="rounded-xl bg-green/10 px-3 py-2 text-sm text-green">{notice}</p>}
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={emailCode}
+                onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder="Code reçu par e-mail"
+                className={`${input} text-center text-2xl tracking-[0.3em] font-bold`}
+                autoFocus
+              />
+              {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+              <button type="submit" disabled={busy || emailCode.length < 6} className={button}>
+                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} Valider et afficher le QR code
+              </button>
+              <div className="flex justify-between text-sm font-semibold">
+                <button type="button" onClick={startRecovery} disabled={busy} className="text-green hover:underline disabled:opacity-50">
+                  Renvoyer le code
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await adminSignOut();
+                    setNotice(null);
+                    setStep("password");
+                  }}
+                  className="text-charcoal/55 hover:text-charcoal"
+                >
+                  Annuler
+                </button>
+              </div>
             </form>
           )}
         </div>
