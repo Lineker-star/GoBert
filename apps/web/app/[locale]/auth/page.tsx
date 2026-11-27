@@ -368,7 +368,7 @@ export default function AuthPage() {
                   ) : (
                   <Field label={t("auth.phoneLabel")} hint={t("auth.phoneHint")} error={error === "invalid_phone" ? errorMsg : null} htmlFor="phone">
                     <div className="flex gap-2">
-                      <Select value={prefix} onChange={(e) => setPrefix(e.target.value)} className="w-[7.5rem] shrink-0" aria-label={t("auth.countryCode")}>
+                      <Select value={prefix} onChange={(e) => setPrefix(e.target.value)} className="w-[8.5rem] shrink-0" aria-label={t("auth.countryCode")}>
                         {PREFIXES.map((p) => (
                           <option key={p.code} value={p.code}>
                             {p.label}
