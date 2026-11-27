@@ -1,5 +1,15 @@
 # Deploying GoBert on Vercel
 
+## Current deployment (27 Nov 2026)
+
+| Project | Production URL | Notes |
+|---|---|---|
+| `gobert` | <https://gobert-lyart.vercel.app> | Public app. Vercel Authentication only on preview deployments. |
+| `gobert-ops` | `https://gobert-ops.vercel.app<ADMIN_BASE_PATH>/login` | Admin console; every other URL answers 404. The team URL (`gobert-ops-megajtechnologies-3208s-projects.vercel.app`) additionally requires a Vercel login. |
+
+Both projects are in the team `megajtechnologies-3208s-projects`, use Node 22 and deploy commit
+`main`. The secret admin path is stored as a *sensitive* environment variable in `gobert-ops`.
+
 GoBert is two Next.js apps in one repository. Each becomes **its own Vercel project**:
 
 | Vercel project | Root Directory | What it is |

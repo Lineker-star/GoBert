@@ -11,7 +11,8 @@
 - [ ] Custom SMTP for email (built-in Supabase email is rate-limited and meant for testing).
 - [x] First admin account: `tanglineker@gmail.com` (role admin; 2FA is set up on first admin login).
 - [ ] Apply `202611260005_admin_stats.sql` (admin trend charts; the CLI lost access to the project before it could be applied).
-- [ ] Production domain in Site URL / redirect URLs — see `docs/DEPLOY_VERCEL.md`.
+- [x] Deployed on Vercel: web <https://gobert-lyart.vercel.app>, admin on `gobert-ops.vercel.app` under the secret path (12/12 live checks).
+- [ ] Supabase Site URL / redirect URLs → `https://gobert-lyart.vercel.app` (already in `supabase/config.toml`; needs `supabase config push` or the dashboard).
 
 The app runs on the in-memory demo backend while `NEXT_PUBLIC_USE_MOCKS=true`.
 These steps switch it to the real Supabase project (`dpziqhptuvjqbikrvcju`).
