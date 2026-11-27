@@ -4,8 +4,8 @@
 
 | Project | Production URL | Notes |
 |---|---|---|
-| `gobert` | <https://gobert-lyart.vercel.app> | Public app. Vercel Authentication only on preview deployments. |
-| `gobert-ops` | `https://gobert-ops.vercel.app<ADMIN_BASE_PATH>/login` | Admin console; every other URL answers 404. The team URL (`gobert-ops-megajtechnologies-3208s-projects.vercel.app`) additionally requires a Vercel login. |
+| `gobert` | <https://gobert.online> (also gobert-lyart.vercel.app) | Public app. Vercel Authentication only on preview deployments. |
+| `gobert-ops` | `https://myadmin.gobert.online<ADMIN_BASE_PATH>/login` (also gobert-ops.vercel.app) | Admin console; every other URL answers 404. The team URL (`gobert-ops-megajtechnologies-3208s-projects.vercel.app`) additionally requires a Vercel login. |
 
 Both projects are in the team `megajtechnologies-3208s-projects`, use Node 22 and deploy commit
 `main`. The secret admin path is stored as a *sensitive* environment variable in `gobert-ops`.

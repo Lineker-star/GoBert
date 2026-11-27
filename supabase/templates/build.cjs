@@ -4,8 +4,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const LOGO = "https://gobert-lyart.vercel.app/brand/logo-full.png";
-const SITE = "https://gobert-lyart.vercel.app";
+const LOGO = "https://gobert.online/brand/logo-full.png";
+const SITE = "https://gobert.online";
 const GREEN = "#087C55";
 const FOREST = "#123D32";
 const ORANGE = "#F28C28";

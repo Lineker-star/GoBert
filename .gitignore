@@ -9,3 +9,6 @@ node_modules/
 .next-preview/
 .next-mock/
 .next-build/
+
+# Supabase personal access token for the GoBert account (never commit)
+.supabase-token
